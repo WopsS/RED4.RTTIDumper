@@ -149,9 +149,8 @@ void TextWriter::Write(std::fstream& aFile, const RED4ext::CBaseFunction* aFunct
     aFile << "function " << aFunction->shortName.ToString();
     aFile << "(";
 
-    for (size_t i = 0; i < aFunction->params.size; i++)
+    for (auto param : aFunction->params)
     {
-        auto param = aFunction->params[i];
         if (param->flags.isOptional)
         {
             aFile << "optional ";
@@ -164,7 +163,7 @@ void TextWriter::Write(std::fstream& aFile, const RED4ext::CBaseFunction* aFunct
 
         Write(aFile, param);
 
-        if (i != aFunction->params.size - 1)
+        if (param != aFunction->params[aFunction->params.size - 1])
         {
             aFile << ", ";
         }
