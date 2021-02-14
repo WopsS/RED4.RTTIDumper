@@ -45,7 +45,7 @@ void JsonWriter::Write(std::shared_ptr<Class> aClass)
         std::filesystem::create_directories(dir);
     }
 
-    std::string name = aClass->fullName.ToString();
+    std::string name = aClass->name.ToString();
     std::fstream file(dir / (name + ".json"), std::ios::out);
 
     nlohmann::ordered_json obj;
@@ -53,10 +53,10 @@ void JsonWriter::Write(std::shared_ptr<Class> aClass)
     auto parent = aClass->parent;
     if (parent)
     {
-        obj["parent"] = parent->fullName.ToString();
+        obj["parent"] = parent->name.ToString();
     }
 
-    obj["fullName"] = {{"hash", aClass->fullName.hash}, {"text", aClass->fullName.ToString()}};
+    obj["name"] = {{"hash", aClass->name.hash}, {"text", aClass->name.ToString()}};
     obj["computedName"] = {{"hash", aClass->computedName.hash}, {"text", aClass->computedName.ToString()}};
     obj["size"] = aClass->size;
     obj["alignment"] = aClass->alignment;
@@ -107,45 +107,48 @@ void JsonWriter::Flush()
     file.close();
 }
 
-nlohmann::ordered_json JsonWriter::ProcessType(Property& aProperty) const
+nlohmann::ordered_json JsonWriter::ProcessType(RED4ext::CProperty* aProperty) const
 {
     nlohmann::ordered_json obj;
 
-    obj["type"] = {{"hash", aProperty.type.fullName.hash}, {"text", aProperty.type.fullName.ToString()}};
-    obj["fullName"] = {{"hash", aProperty.fullName.hash}, {"text", aProperty.fullName.ToString()}};
+    RED4ext::CName typeName;
+    aProperty->type->GetName(typeName);
 
-    if (aProperty.group.hash)
+    obj["type"] = {{"hash", typeName.hash}, {"text", typeName.ToString()}};
+    obj["name"] = {{"hash", aProperty->name.hash}, {"text", aProperty->name.ToString()}};
+
+    if (aProperty->group.hash)
     {
-        obj["group"] = {{"hash", aProperty.group.hash}, {"text", aProperty.group.ToString()}};
+        obj["group"] = {{"hash", aProperty->group.hash}, {"text", aProperty->group.ToString()}};
     }
 
-    obj["valueOffset"] = aProperty.valueOffset;
-    obj["flags"] = *reinterpret_cast<uint64_t*>(&aProperty.flags);
+    obj["valueOffset"] = aProperty->valueOffset;
+    obj["flags"] = *reinterpret_cast<uint64_t*>(&aProperty->flags);
 
     return obj;
 }
 
-nlohmann::ordered_json JsonWriter::ProcessType(Function& aFunction) const
+nlohmann::ordered_json JsonWriter::ProcessType(RED4ext::CBaseFunction* aFunction) const
 {
     nlohmann::ordered_json obj;
-    obj["fullName"] = {{"hash", aFunction.fullName.hash}, {"text", aFunction.fullName.ToString()}};
-    obj["shortName"] = {{"hash", aFunction.shortName.hash}, {"text", aFunction.shortName.ToString()}};
+    obj["fullName"] = {{"hash", aFunction->fullName.hash}, {"text", aFunction->fullName.ToString()}};
+    obj["shortName"] = {{"hash", aFunction->shortName.hash}, {"text", aFunction->shortName.ToString()}};
 
-    if (aFunction.returnType)
+    if (aFunction->returnType)
     {
-        obj["return"] = ProcessType(*aFunction.returnType.get());
+        obj["return"] = ProcessType(aFunction->returnType);
     }
 
-    if (aFunction.index)
+    if (aFunction->GetRegIndex() != -1)
     {
-        obj["index"] = aFunction.index;
+        obj["index"] = aFunction->GetRegIndex();
     }
 
-    obj["flags"] = *reinterpret_cast<uint32_t*>(&aFunction.flags);
+    obj["flags"] = *reinterpret_cast<uint32_t*>(&aFunction->flags);
 
     nlohmann::ordered_json params;
 
-    for (auto& param : aFunction.params)
+    for (auto& param : aFunction->params)
     {
         auto obj = ProcessType(param);
         params.emplace_back(obj);

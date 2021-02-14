@@ -60,7 +60,7 @@ void Dumper::CollectType(RED4ext::CClass* aClass)
         cls->parent = parent;
     }
 
-    cls->fullName = aClass->name;
+    cls->name = aClass->name;
     cls->computedName = aClass->name2;
     cls->size = aClass->size;
     cls->alignment = aClass->alignment;
@@ -68,28 +68,26 @@ void Dumper::CollectType(RED4ext::CClass* aClass)
     cls->flags = aClass->flags;
 
     cls->props.reserve(aClass->props.size);
-    for (auto nativeProp : aClass->props)
+    for (auto prop : aClass->props)
     {
-        auto prop = ProcessType(nativeProp);
-        cls->props.emplace_back(std::move(prop));
+        cls->props.emplace_back(prop);
     }
 
-    std::sort(cls->props.begin(), cls->props.end(),
-              [](const Property& aLhs, const Property& aRhs) { return aLhs.valueOffset < aRhs.valueOffset; });
+    std::sort(cls->props.begin(), cls->props.end(), [](const RED4ext::CProperty* aLhs, const RED4ext::CProperty* aRhs) {
+        return aLhs->valueOffset < aRhs->valueOffset;
+    });
 
-    for (auto nativeFunc : aClass->funcs)
+    for (auto func : aClass->funcs)
     {
-        auto func = ProcessType(nativeFunc);
-        cls->funcs.emplace_back(std::move(func));
+        cls->funcs.emplace_back(func);
     }
 
-    for (auto nativeFunc : aClass->staticFuncs)
+    for (auto func : aClass->staticFuncs)
     {
-        auto func = ProcessType(nativeFunc);
-        cls->funcs.emplace_back(std::move(func));
+        cls->funcs.emplace_back(func);
     }
 
-    m_types.emplace(cls->fullName.ToString(), cls);
+    m_types.emplace(cls->name.ToString(), cls);
 }
 
 void Dumper::CollectStatics()
@@ -104,31 +102,29 @@ void Dumper::CollectStatics()
             std::string clsName(name, pos - name);
             auto cls = std::dynamic_pointer_cast<Class>(m_types.at(clsName.c_str()));
 
-            auto func = ProcessType(aFunction);
-            cls->funcs.emplace_back(std::move(func));
+            cls->funcs.emplace_back(aFunction);
         }
         else
         {
-            auto func = ProcessType(aFunction);
-            m_global.funcs.emplace_back(std::move(func));
+            m_global.funcs.emplace_back(aFunction);
         }
     });
 }
 
 void Dumper::OrderFunctions()
 {
-    auto comp = [](const Function& aLhs, const Function& aRhs) {
-        if (aLhs.flags.isStatic != aRhs.flags.isStatic)
+    auto comp = [](const RED4ext::CBaseFunction* aLhs, const RED4ext::CBaseFunction* aRhs) {
+        if (aLhs->flags.isStatic != aRhs->flags.isStatic)
         {
-            return aLhs.flags.isStatic == true;
+            return aLhs->flags.isStatic == true;
         }
 
-        if (aLhs.flags.isNative != aRhs.flags.isNative)
+        if (aLhs->flags.isNative != aRhs->flags.isNative)
         {
-            return aLhs.flags.isNative == true;
+            return aLhs->flags.isNative == true;
         }
 
-        return std::strcmp(aLhs.shortName.ToString(), aRhs.shortName.ToString()) < 0;
+        return std::strcmp(aLhs->shortName.ToString(), aRhs->shortName.ToString()) < 0;
     };
 
     std::sort(m_global.funcs.begin(), m_global.funcs.end(), comp);
@@ -143,57 +139,4 @@ void Dumper::OrderFunctions()
 
         std::sort(cls->funcs.begin(), cls->funcs.end(), comp);
     }
-}
-
-Property Dumper::ProcessType(RED4ext::CProperty* aProperty)
-{
-    Property prop{};
-    aProperty->type->GetName(prop.type.fullName);
-
-    prop.fullName = aProperty->name;
-    prop.group = aProperty->group;
-    prop.valueOffset = aProperty->valueOffset;
-    prop.group = aProperty->group;
-    prop.flags = aProperty->flags;
-
-    return prop;
-}
-
-Function Dumper::ProcessType(RED4ext::CBaseFunction* aFunction)
-{
-    Function func{};
-    func.fullName = aFunction->fullName;
-    func.shortName = aFunction->shortName;
-    func.flags = aFunction->flags;
-
-    if (aFunction->returnType)
-    {
-        auto prop = ProcessType(aFunction->returnType);
-        func.returnType = std::make_unique<Property>(std::move(prop));
-    }
-
-    func.params.reserve(aFunction->params.size);
-    for (auto nativeParam : aFunction->params)
-    {
-        auto param = ProcessType(nativeParam);
-        func.params.emplace_back(param);
-    }
-
-    return func;
-}
-
-Function Dumper::ProcessType(RED4ext::CGlobalFunction* aFunction)
-{
-    auto func = ProcessType(static_cast<RED4ext::CBaseFunction*>(aFunction));
-    func.index = aFunction->index;
-
-    return func;
-}
-
-Function Dumper::ProcessType(RED4ext::CClassFunction* aFunction)
-{
-    auto func = ProcessType(static_cast<RED4ext::CBaseFunction*>(aFunction));
-    func.index = aFunction->index;
-
-    return func;
 }

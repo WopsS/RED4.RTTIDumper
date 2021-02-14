@@ -16,12 +16,6 @@ private:
 
     void OrderFunctions();
 
-    Property ProcessType(RED4ext::CProperty* aProperty);
-
-    Function ProcessType(RED4ext::CBaseFunction* aFunction);
-    Function ProcessType(RED4ext::CGlobalFunction* aFunction);
-    Function ProcessType(RED4ext::CClassFunction* aFunction);
-
     Global m_global;
     std::map<std::string, std::shared_ptr<BaseType>> m_types;
 };

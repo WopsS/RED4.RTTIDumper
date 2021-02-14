@@ -13,8 +13,8 @@ public:
     void Flush();
 
 private:
-    nlohmann::ordered_json ProcessType(Property& aProperty) const;
-    nlohmann::ordered_json ProcessType(Function& aFunction) const;
+    nlohmann::ordered_json ProcessType(RED4ext::CProperty* aProperty) const;
+    nlohmann::ordered_json ProcessType(RED4ext::CBaseFunction* aFunction) const;
 
     std::filesystem::path m_dir;
     bool m_prettyDump;

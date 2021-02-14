@@ -6,24 +6,7 @@ struct BaseType
 {
     virtual ~BaseType() = default;
 
-    RED4ext::CName fullName;
-};
-
-struct Property : BaseType
-{
-    BaseType type;
-    RED4ext::CName group;
-    uint32_t valueOffset;
-    RED4ext::CProperty::Flags flags;
-};
-
-struct Function : BaseType
-{
-    RED4ext::CName shortName;
-    std::unique_ptr<Property> returnType;
-    std::vector<Property> params;
-    uint32_t index;
-    RED4ext::CBaseFunction::Flags flags;
+    RED4ext::CName name;
 };
 
 struct Class : BaseType
@@ -36,11 +19,11 @@ struct Class : BaseType
     uint32_t holderSize;
     RED4ext::CClass::Flags flags;
 
-    std::vector<Property> props;
-    std::vector<Function> funcs;
+    std::vector<RED4ext::CProperty*> props;
+    std::vector<RED4ext::CBaseFunction*> funcs;
 };
 
 struct Global
 {
-    std::vector<Function> funcs;
+    std::vector<RED4ext::CGlobalFunction*> funcs;
 };

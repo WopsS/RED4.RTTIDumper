@@ -14,8 +14,8 @@ public:
 
 private:
     void Write(std::fstream& aFile, std::shared_ptr<Class> aClass);
-    void Write(std::fstream& aFile, const Property& aProperty);
-    void Write(std::fstream& aFile, const Function& aFunction);
+    void Write(std::fstream& aFile, const RED4ext::CProperty* aProperty);
+    void Write(std::fstream& aFile, const RED4ext::CBaseFunction* aFunction);
 
     std::filesystem::path m_dir;
 };
