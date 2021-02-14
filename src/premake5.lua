@@ -9,6 +9,7 @@ project("RED4.RTTIDumper")
     includedirs(
     {
         ".",
+        paths.deps("json", "single_include"),
         paths.deps("red4ext.sdk", "include")
     })
 

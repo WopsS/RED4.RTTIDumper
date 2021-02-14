@@ -1,7 +1,7 @@
 #include "stdafx.hpp"
 #include "Dumper.hpp"
 
-void Dumper::Run(IWriter& aWriter)
+void Dumper::Run(std::shared_ptr<IWriter> aWriter)
 {
     if (m_types.empty())
     {
@@ -11,21 +11,21 @@ void Dumper::Run(IWriter& aWriter)
         OrderFunctions();
     }
 
-    aWriter.Write(m_global);
+    aWriter->Write(m_global);
 
     for (const auto [key, type] : m_types)
     {
         auto cls = std::dynamic_pointer_cast<Class>(type);
         if (cls)
         {
-            aWriter.Write(cls);
+            aWriter->Write(cls);
             continue;
         }
 
         throw std::runtime_error("unhandled type");
     }
 
-    aWriter.Flush();
+    aWriter->Flush();
 }
 
 void Dumper::CollectTypes()

@@ -7,4 +7,5 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 
+#include <nlohmann/json.hpp>
 #include <RED4ext/RED4ext.hpp>

@@ -6,7 +6,7 @@
 class Dumper
 {
 public:
-    void Run(IWriter& aWriter);
+    void Run(std::shared_ptr<IWriter> aWriter);
 
 private:
     void CollectTypes();

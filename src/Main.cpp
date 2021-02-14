@@ -2,6 +2,7 @@
 
 #include "Dumper.hpp"
 #include "SuspendThreads.hpp"
+#include "Writers/JsonWriter.hpp"
 #include "Writers/TextWriter.hpp"
 
 RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED4ext::IRED4ext* aInterface)
@@ -11,10 +12,16 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED
     SuspendThreads _;
 
     auto dumpsDir = std::filesystem::current_path() / L"dumps";
-    TextWriter writer(dumpsDir);
+
+    std::vector<std::shared_ptr<IWriter>> writers;
+    writers.emplace_back(new TextWriter(dumpsDir));
+    writers.emplace_back(new JsonWriter(dumpsDir));
 
     Dumper dumper;
-    dumper.Run(writer);
+    for (auto writer : writers)
+    {
+        dumper.Run(writer);
+    }
 
     return true;
 }
