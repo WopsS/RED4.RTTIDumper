@@ -91,8 +91,7 @@ void WolvenKitWriter::Write(Global& aGlobal)
 
 void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
 {
-    // auto dir = m_dir / L"classes";
-    std::filesystem::path dir = "D:/Development/Wolvenkit/CP77.CR2W/Types/cp77";
+    auto dir = m_dir / L"classes";
     if (!std::filesystem::exists(dir))
     {
         std::filesystem::create_directories(dir);
@@ -109,7 +108,6 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
 
     std::fstream file(dir / (name + ".cs"), std::ios::out);
 
-    file << "using System.IO;" << std::endl;
     file << "using CP77.CR2W.Reflection;" << std::endl;
     file << "using FastMember;" << std::endl;
     file << "using static CP77.CR2W.Types.Enums;" << std::endl;

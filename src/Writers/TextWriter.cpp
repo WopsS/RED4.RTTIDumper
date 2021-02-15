@@ -90,7 +90,7 @@ void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
         aFile << "; // " << std::hex << std::showbase << prop->valueOffset << std::endl;
     }
 
-    if (!aClass->props.empty())
+    if (!aClass->props.empty() && !aClass->funcs.empty())
     {
         aFile << std::endl;
     }
