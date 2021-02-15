@@ -11,6 +11,8 @@ struct BaseType
 
 struct Class : BaseType
 {
+    RED4ext::CClass* raw;
+
     std::shared_ptr<Class> parent;
     RED4ext::CName computedName;
 

@@ -4,6 +4,7 @@
 #include "SuspendThreads.hpp"
 #include "Writers/JsonWriter.hpp"
 #include "Writers/TextWriter.hpp"
+#include "Writers/WolvenKitWriter.hpp"
 
 RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED4ext::IRED4ext* aInterface)
 {
@@ -16,6 +17,7 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED
     std::vector<std::shared_ptr<IWriter>> writers;
     writers.emplace_back(new TextWriter(dumpsDir));
     writers.emplace_back(new JsonWriter(dumpsDir));
+    writers.emplace_back(new WolvenKitWriter(dumpsDir));
 
     Dumper dumper;
     for (auto writer : writers)
