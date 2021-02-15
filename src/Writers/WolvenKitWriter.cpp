@@ -109,8 +109,13 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
     std::fstream file(dir / (name + ".cs"), std::ios::out);
 
     file << "using CP77.CR2W.Reflection;" << std::endl;
-    file << "using FastMember;" << std::endl;
-    file << "using static CP77.CR2W.Types.Enums;" << std::endl;
+
+    if (!aClass->props.empty())
+    {
+        file << "using FastMember;" << std::endl;
+        file << "using static CP77.CR2W.Types.Enums;" << std::endl;
+    }
+
     file << std::endl;
     file << "namespace CP77.CR2W.Types" << std::endl;
     file << "{" << std::endl;
