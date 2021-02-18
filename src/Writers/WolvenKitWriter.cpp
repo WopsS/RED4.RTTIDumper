@@ -10,9 +10,29 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
         std::filesystem::create_directories(m_dir);
     }
 
+    // WolvenKit has custom names for some types.
+    m_typeMappings.emplace("bool", "CBool");
+    m_typeMappings.emplace("int", "CInt32");
+    m_typeMappings.emplace("float", "CFloat");
+
+    m_typeMappings.emplace("Uint8", "UInt8");
+    m_typeMappings.emplace("Uint16", "UInt16");
+    m_typeMappings.emplace("Uint32", "UInt32");
+    m_typeMappings.emplace("Uint64", "UInt64");
+
+    m_typeMappings.emplace("String", "CString");
+    m_typeMappings.emplace("string", "CString");
+    m_typeMappings.emplace("Color", "CColor");
+    m_typeMappings.emplace("Matrix", "CMatrix");
+    m_typeMappings.emplace("Variant", "CVariant");
+
+    // This is a simple for some reason.
+    m_typeMappings.emplace("multiChannelCurve:Float", "multiChannelCurve<CFloat>");
+
     // WolvenKit has custom classes (with more functions or fields) for some RTTI classes.
-    m_customClasses.emplace("Color");
+    m_customClasses.emplace("CColor");
     m_customClasses.emplace("C2dArray");
+    m_customClasses.emplace("CMatrix");
     m_customClasses.emplace("CMesh");
 
     m_customClasses.emplace("AITrafficWorkspotCompiled");
@@ -69,20 +89,7 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("worldNode");
 
     // Some ordinals needs to be skipped.
-    m_skippedOrdinals.emplace("CMesh", std::unordered_set<size_t>{4, 20});
-
-    // WolvenKit has custom names for some types.
-    m_typeMappings.emplace("Uint8", "UInt8");
-    m_typeMappings.emplace("Uint16", "UInt16");
-    m_typeMappings.emplace("Uint32", "UInt32");
-    m_typeMappings.emplace("Uint64", "UInt64");
-
-    m_typeMappings.emplace("Color", "CColor");
-    m_typeMappings.emplace("String", "CString");
-    m_typeMappings.emplace("Variant", "CVariant");
-
-    // This is a simple for some reason.
-    m_typeMappings.emplace("multiChannelCurve:Float", "multiChannelCurve<CFloat>");
+    m_skippedOrdinals.emplace("CMesh", std::unordered_set<size_t>{1, 5, 21});
 }
 
 void WolvenKitWriter::Write(Global& aGlobal)
@@ -97,7 +104,7 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
         std::filesystem::create_directories(dir);
     }
 
-    std::string name = aClass->name.ToString();
+    auto name =  GetWolvenType(aClass->name.ToString());
     auto skippedOrdinals = m_skippedOrdinals.find(name);
 
     auto elem = m_customClasses.find(name);
@@ -124,7 +131,8 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
     file << "\tpublic class " << name << " : ";
     if (aClass->parent)
     {
-        file << aClass->parent->name.ToString();
+        auto parent = GetWolvenType(aClass->parent->name.ToString());
+        file << parent;
     }
     else
     {
@@ -172,12 +180,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     RED4ext::CName cname;
     aType->GetName(cname);
 
-    std::string_view name = cname.ToString();
-    auto elem = m_typeMappings.find(name.data());
-    if (elem != m_typeMappings.end())
-    {
-        name = elem->second;
-    }
+    auto name = GetWolvenType(cname.ToString());
 
     using ERTTIType = RED4ext::ERTTIType;
     switch (aType->GetType())
@@ -347,6 +350,17 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
 
     aFile << " ";
     aFile << "{ get; set; }" << std::endl;
+}
+
+std::string WolvenKitWriter::GetWolvenType(const char* aName)
+{
+    auto elem = m_typeMappings.find(aName);
+    if (elem != m_typeMappings.end())
+    {
+        return elem->second;
+    }
+
+    return aName;
 }
 
 size_t WolvenKitWriter::GetOrdinalStart(std::shared_ptr<Class> aClass)
