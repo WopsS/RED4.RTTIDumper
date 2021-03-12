@@ -28,6 +28,8 @@ private:
 
     std::unordered_map<std::string, std::string> m_typeMappings;
 
-    std::unordered_set<std::string> m_customClasses;
+    std::unordered_map<std::string, size_t> m_customClasses;
     std::unordered_map<std::string, std::unordered_set<size_t>> m_skippedOrdinals;
+    std::unordered_map<std::string, size_t> m_nextOrdinals;
+    std::unordered_set<std::string> m_isWritten;
 };

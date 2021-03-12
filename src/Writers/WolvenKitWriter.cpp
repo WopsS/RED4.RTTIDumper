@@ -30,66 +30,78 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_typeMappings.emplace("multiChannelCurve:Float", "multiChannelCurve<CFloat>");
 
     // WolvenKit has custom classes (with more functions or fields) for some RTTI classes.
-    m_customClasses.emplace("CColor");
-    m_customClasses.emplace("C2dArray");
-    m_customClasses.emplace("CMatrix");
-    m_customClasses.emplace("CMesh");
+    m_customClasses.emplace("CColor", 0);
+    m_customClasses.emplace("C2dArray", 0);
+    m_customClasses.emplace("CMatrix", 0);
+    m_customClasses.emplace("CMesh", 0);
 
-    m_customClasses.emplace("AITrafficWorkspotCompiled");
-    m_customClasses.emplace("animAnimFeatureEntry");
-    m_customClasses.emplace("animAnimGraph");
-    m_customClasses.emplace("animAnimNode_Base");
-    m_customClasses.emplace("animAnimNode_BlendFromPose");
-    m_customClasses.emplace("animAnimNode_BlendMultiple");
-    m_customClasses.emplace("animAnimNode_ConditionalSegmentBegin");
-    m_customClasses.emplace("animAnimNode_ConditionalSegmentEnd");
-    m_customClasses.emplace("animAnimNode_FloatInput");
-    m_customClasses.emplace("animAnimNode_ForegroundSegmentBegin");
-    m_customClasses.emplace("animAnimNode_ForegroundSegmentEnd");
-    m_customClasses.emplace("animAnimNode_IntInput");
-    m_customClasses.emplace("animAnimNode_LookAtController");
-    m_customClasses.emplace("animAnimNode_MathExpressionFloat");
-    m_customClasses.emplace("animAnimNode_MathExpressionPose");
-    m_customClasses.emplace("animAnimNode_MathExpressionVector");
-    m_customClasses.emplace("animAnimNode_ReferencePoseTerminator");
-    m_customClasses.emplace("animAnimNode_Sermo");
-    m_customClasses.emplace("animAnimNode_SkAnim");
-    m_customClasses.emplace("animAnimNode_StackTracksExtender");
-    m_customClasses.emplace("animAnimNode_StackTracksShrinker");
-    m_customClasses.emplace("animAnimNode_StackTransformsExtender");
-    m_customClasses.emplace("animAnimNode_StackTransformsShrinker");
-    m_customClasses.emplace("animAnimNode_StateMachine");
-    m_customClasses.emplace("animAnimStateTransitionCondition_IntFeature");
-    m_customClasses.emplace("animAnimStateTransitionInterpolator_Blend");
-    m_customClasses.emplace("animAnimVariable");
-    m_customClasses.emplace("animCollisionRoundedShape");
-    m_customClasses.emplace("animDangleConstraint_Simulation");
-    m_customClasses.emplace("animDangleConstraint_SimulationDyng");
-    m_customClasses.emplace("animDyngConstraintEllipsoid");
-    m_customClasses.emplace("animDyngParticle");
-    m_customClasses.emplace("animIDyngConstraint");
-    m_customClasses.emplace("animLookAtPartInfo");
-    m_customClasses.emplace("animLookAtPartsDependency");
-    m_customClasses.emplace("animLookAtRequest");
-    m_customClasses.emplace("animRig");
-    m_customClasses.emplace("CMaterialInstance");
-    m_customClasses.emplace("CMaterialTemplate");
-    m_customClasses.emplace("gameDeviceResourceData");
-    m_customClasses.emplace("gameJournalCodexDescription");
-    m_customClasses.emplace("gameLocationResource");
-    m_customClasses.emplace("gameLootResourceData");
-    m_customClasses.emplace("meshMeshParamSpeedTreeWind");
-    m_customClasses.emplace("MorphTargetMesh");
-    m_customClasses.emplace("physicsColliderMesh");
-    m_customClasses.emplace("physicsMaterialLibraryResource");
-    m_customClasses.emplace("scnAnimationRid");
-    m_customClasses.emplace("scnAnimName");
-    m_customClasses.emplace("scnAnimName");
-    m_customClasses.emplace("worldTrafficLanesSpotsResource");
-    m_customClasses.emplace("worldNode");
+    m_customClasses.emplace("AITrafficWorkspotCompiled", 0);
+    m_customClasses.emplace("STextureGroupSetup", 1);
+    m_customClasses.emplace("animAnimFeatureEntry", 0);
+    m_customClasses.emplace("animAnimGraph", 0);
+    m_customClasses.emplace("animAnimNode_AddSnapToTerrainIkRequest", 0);
+    m_customClasses.emplace("animAnimNode_Base", 10);
+    m_customClasses.emplace("animAnimNode_BlendFromPose", 0);
+    m_customClasses.emplace("animAnimNode_BlendMultiple", 0);
+    m_customClasses.emplace("animAnimNode_ConditionalSegmentBegin", 0);
+    m_customClasses.emplace("animAnimNode_ConditionalSegmentEnd", 0);
+    m_customClasses.emplace("animAnimNode_Drag", 0);
+    m_customClasses.emplace("animAnimNode_FloatInput", 0);
+    m_customClasses.emplace("animAnimNode_FloatTrackDirectConnConstraint", 1);
+    m_customClasses.emplace("animAnimNode_ForegroundSegmentBegin", 0);
+    m_customClasses.emplace("animAnimNode_ForegroundSegmentEnd", 0);
+    m_customClasses.emplace("animAnimNode_IntInput", 0);
+    m_customClasses.emplace("animAnimNode_LookAtController", 0);
+    m_customClasses.emplace("animAnimNode_MathExpressionFloat", 0);
+    m_customClasses.emplace("animAnimNode_MathExpressionPose", 0);
+    m_customClasses.emplace("animAnimNode_MathExpressionVector", 0);
+    m_customClasses.emplace("animAnimNode_ReferencePoseTerminator", 0);
+    m_customClasses.emplace("animAnimNode_Sermo", 0);
+    m_customClasses.emplace("animAnimNode_SkAnim", 2);
+    m_customClasses.emplace("animAnimNode_StackTracksExtender", 0);
+    m_customClasses.emplace("animAnimNode_StackTracksShrinker", 0);
+    m_customClasses.emplace("animAnimNode_StackTransformsExtender", 0);
+    m_customClasses.emplace("animAnimNode_StackTransformsShrinker", 0);
+    m_customClasses.emplace("animAnimNode_StateMachine", 0);
+    m_customClasses.emplace("animAnimStateTransitionCondition_IntFeature", 0);
+    m_customClasses.emplace("animAnimStateTransitionInterpolator_Blend", 0);
+    m_customClasses.emplace("animAnimVariable", 1);
+    m_customClasses.emplace("animCollisionRoundedShape", 0);
+    m_customClasses.emplace("animDangleConstraint_Simulation", 5);
+    m_customClasses.emplace("animDangleConstraint_SimulationDyng", 0);
+    m_customClasses.emplace("animDyngConstraintEllipsoid", 0);
+    m_customClasses.emplace("animDyngParticle", 0);
+    m_customClasses.emplace("animIDyngConstraint", 1);
+    m_customClasses.emplace("animLipsyncMapping", 1);
+    m_customClasses.emplace("animLookAtPartInfo", 0);
+    m_customClasses.emplace("animLookAtPartsDependency", 0);
+    m_customClasses.emplace("animLookAtRequest", 0);
+    m_customClasses.emplace("animRig", 0);
+    m_customClasses.emplace("CMaterialInstance", 0);
+    m_customClasses.emplace("CMaterialTemplate", 0);
+    m_customClasses.emplace("gameDeviceResourceData", 0);
+    m_customClasses.emplace("gameJournalCodexDescription", 0);
+    m_customClasses.emplace("gameJournalInternetPage", 1);
+    m_customClasses.emplace("gameLocationResource", 0);
+    m_customClasses.emplace("gameLootResourceData", 0);
+    m_customClasses.emplace("meshMeshParamSpeedTreeWind", 0);
+    m_customClasses.emplace("MorphTargetMesh", 0);
+    m_customClasses.emplace("physicsColliderMesh", 0);
+    m_customClasses.emplace("physicsMaterialLibraryResource", 0);
+    m_customClasses.emplace("scnAnimationRid", 0);
+    m_customClasses.emplace("scnAnimName", 0);
+    m_customClasses.emplace("scnAnimName", 0);
+    m_customClasses.emplace("worldTrafficLanesSpotsResource", 0);
+    m_customClasses.emplace("worldNode", 0);
 
     // Some ordinals needs to be skipped.
     m_skippedOrdinals.emplace("CMesh", std::unordered_set<size_t>{1, 5, 21});
+    m_skippedOrdinals.emplace("animAnimNode_AddSnapToTerrainIkRequest", std::unordered_set<size_t>{12});
+    m_skippedOrdinals.emplace("animAnimNode_ConditionalSegmentBegin", std::unordered_set<size_t>{12});
+    m_skippedOrdinals.emplace("animAnimNode_Drag", std::unordered_set<size_t>{16});
+    m_skippedOrdinals.emplace("animDyngParticle", std::unordered_set<size_t>{0});
+    m_skippedOrdinals.emplace("animLipsyncMapping", std::unordered_set<size_t>{3});
+    m_skippedOrdinals.emplace("worldNode", std::unordered_set<size_t>{0, 1});
 }
 
 void WolvenKitWriter::Write(Global& aGlobal)
@@ -104,7 +116,22 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
         std::filesystem::create_directories(dir);
     }
 
-    auto name =  GetWolvenType(aClass->name.ToString());
+    auto orgName = GetWolvenType(aClass->name.ToString());
+    auto name = orgName;
+
+    auto isWritten = m_isWritten.find(name);
+    if (isWritten != m_isWritten.end())
+    {
+        return;
+    }
+
+    if (aClass->parent)
+    {
+        Write(aClass->parent);
+    }
+
+    
+    
     auto skippedOrdinals = m_skippedOrdinals.find(name);
 
     auto elem = m_customClasses.find(name);
@@ -159,6 +186,13 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
         Write(file, prop, ordinal++);
     }
 
+    if (elem != m_customClasses.end())
+    {
+        ordinal += elem->second;
+    }
+
+    m_nextOrdinals.emplace(orgName, ordinal);
+
     if (aClass->props.size())
     {
         file << std::endl;
@@ -169,6 +203,8 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
 
     file << "\t}" << std::endl;
     file << "}" << std::endl;
+
+    m_isWritten.emplace(orgName);
 }
 
 void WolvenKitWriter::Flush()
@@ -367,10 +403,14 @@ size_t WolvenKitWriter::GetOrdinalStart(std::shared_ptr<Class> aClass)
 {
     if (aClass->parent)
     {
-        auto result = aClass->parent->props.size();
-        result += GetOrdinalStart(aClass->parent);
+        auto parentName = GetWolvenType(aClass->parent->name.ToString());
+        auto elem = m_nextOrdinals.find(parentName);
+        if (elem != m_nextOrdinals.end())
+        {
+            return elem->second;
+        }
 
-        return result;
+        throw std::runtime_error("unknown parent");
     }
 
     return 0;
