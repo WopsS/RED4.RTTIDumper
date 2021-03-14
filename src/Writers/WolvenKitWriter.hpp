@@ -17,6 +17,7 @@ private:
     void Write(std::fstream& aFile, RED4ext::CProperty* aProperty, size_t aOrdinal);
 
     std::string GetWolvenType(const char* aName);
+    std::string GetCSType(RED4ext::IRTTIType* aType);
     size_t GetOrdinalStart(std::shared_ptr<Class> aClass);
 
     bool CheckForDuplicate(RED4ext::CClass* aClass, RED4ext::CProperty* aProperty);

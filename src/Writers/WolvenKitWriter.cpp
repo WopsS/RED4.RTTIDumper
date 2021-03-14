@@ -130,8 +130,8 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
         Write(aClass->parent);
     }
 
-    
-    
+
+
     auto skippedOrdinals = m_skippedOrdinals.find(name);
 
     auto elem = m_customClasses.find(name);
@@ -170,6 +170,21 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
     file << "\t{" << std::endl;
 
     auto ordinal = GetOrdinalStart(aClass);
+    if (name == "worldInstancedDestructibleMeshNode")
+    {
+        ordinal = 1000;
+    }
+
+    for (auto prop : aClass->raw->props)
+    {
+        auto csType = GetCSType(prop->type);
+        auto name = SanitizeGeneral(prop->name.ToString());
+        name[0] = std::tolower(name[0]);
+
+        file << "\t\tprivate " << csType << " _" << name << ";" << std::endl;
+    }
+
+    file << std::endl;
 
     // We want to write them as they are in the RTTI type, not orderd by offset.
     for (auto prop : aClass->raw->props)
@@ -192,11 +207,6 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
     }
 
     m_nextOrdinals.emplace(orgName, ordinal);
-
-    if (aClass->props.size())
-    {
-        file << std::endl;
-    }
 
     file << "\t\tpublic " << name << "(CR2WFile cr2w, CVariable parent, string name) : base(cr2w, parent, name) { }"
          << std::endl;
@@ -328,11 +338,10 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
 
 void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, size_t aOrdinal)
 {
-    std::string name = aProperty->name.ToString();
+    std::string orgName = aProperty->name.ToString();
 
-    aFile << "\t\t";
-    aFile << "[Ordinal(" << aOrdinal << ")] ";
-    aFile << "[RED(\"" << name << "\"";
+    aFile << "\t\t[Ordinal(" << aOrdinal << ")] " << std::endl;
+    aFile << "\t\t[RED(\"" << orgName << "\"";
 
     auto type = aProperty->type;
 
@@ -353,15 +362,18 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
     }
     }
 
-    aFile << ")] ";
-    aFile << "public ";
+    auto csType = GetCSType(aProperty->type);
 
-    Write(aFile, type);
-    aFile << " ";
+    aFile << ")] " << std::endl;
+    aFile << "\t\tpublic " << csType << " ";
 
-    name = SanitizeGeneral(name);
+    auto name = SanitizeGeneral(orgName);
     name[0] = std::toupper(name[0]);
     name = Sanitize(name);
+
+    auto privateName = SanitizeGeneral(orgName);
+    privateName[0] = std::tolower(privateName[0]);
+    privateName = "_" + privateName;
 
     auto parent = aProperty->parent;
 
@@ -384,8 +396,30 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
         aFile << aProperty->valueOffset;
     }
 
-    aFile << " ";
-    aFile << "{ get; set; }" << std::endl;
+    RED4ext::CName typeName;
+    aProperty->type->GetName(typeName);
+
+    aFile << std::endl;
+    aFile << "\t\t{" << std::endl;
+    aFile << "\t\t\tget" << std::endl;
+    aFile << "\t\t\t{" << std::endl;
+    aFile << "\t\t\t\tif (" << privateName << " == null)" << std::endl;
+    aFile << "\t\t\t\t{" << std::endl;
+    aFile << "\t\t\t\t\t" << privateName << " = (" << csType << ") CR2WTypeManager.Create(\"" << typeName.ToString() << "\", \"" << orgName << "\", cr2w, this);" << std::endl;
+    aFile << "\t\t\t\t}" << std::endl;
+    aFile << "\t\t\t\treturn " << privateName << ";" << std::endl;
+    aFile << "\t\t\t}" << std::endl;
+    aFile << "\t\t\tset" << std::endl;
+    aFile << "\t\t\t{" << std::endl;
+    aFile << "\t\t\t\tif (" << privateName << " == value)" << std::endl;
+    aFile << "\t\t\t\t{" << std::endl;
+    aFile << "\t\t\t\t\treturn;" << std::endl;
+    aFile << "\t\t\t\t}" << std::endl;
+    aFile << "\t\t\t\t" << privateName << " = value;" << std::endl;
+    aFile << "\t\t\t\tPropertySet(this);" << std::endl;
+    aFile << "\t\t\t}" << std::endl;
+    aFile << "\t\t}" << std::endl;
+    aFile << std::endl;
 }
 
 std::string WolvenKitWriter::GetWolvenType(const char* aName)
@@ -397,6 +431,72 @@ std::string WolvenKitWriter::GetWolvenType(const char* aName)
     }
 
     return aName;
+}
+
+std::string WolvenKitWriter::GetCSType(RED4ext::IRTTIType* aType)
+{
+    RED4ext::CName cname;
+    aType->GetName(cname);
+
+    auto name = GetWolvenType(cname.ToString());
+
+    using ERTTIType = RED4ext::ERTTIType;
+    switch (aType->GetType())
+    {
+    case ERTTIType::Fundamental:
+    {
+        return "C" + name;
+    }
+    case ERTTIType::Array:
+    {
+        auto arr = static_cast<RED4ext::CArray*>(aType);
+        return "CArray<" + GetCSType(arr->innerType) + ">";
+    }
+    case ERTTIType::Enum:
+    case ERTTIType::BitField:
+    {
+        return "CEnum<" + name + ">";
+    }
+    case ERTTIType::StaticArray:
+    {
+        auto arr = static_cast<RED4ext::CStaticArray*>(aType);
+        return "CStatic<" + GetCSType(arr->innerType) + ">";
+    }
+    case ERTTIType::NativeArray:
+    {
+        auto arr = static_cast<RED4ext::CNativeArray*>(aType);
+        return "CArrayFixedSize<" + GetCSType(arr->innerType) + ">";
+    }
+    case ERTTIType::Handle:
+    {
+        auto handle = static_cast<RED4ext::CHandle*>(aType);
+        return "CHandle<" + GetCSType(handle->innerType) + ">";
+    }
+    case ERTTIType::WeakHandle:
+    {
+        auto whandle = static_cast<RED4ext::CWeakHandle*>(aType);
+        return "wCHandle<" + GetCSType(whandle->innerType) + ">";
+    }
+    case ERTTIType::ResourceReference:
+    {
+        auto rRef = static_cast<RED4ext::CResourceReference*>(aType);
+        return "rRef<" + GetCSType(rRef->innerType) + ">";
+    }
+    case ERTTIType::ResourceAsyncReference:
+    {
+        auto raRef = static_cast<RED4ext::CResourceAsyncReference*>(aType);
+        return "raRef<" + GetCSType(raRef->innerType) + ">";
+    }
+    case ERTTIType::LegacySingleChannelCurve:
+    {
+        auto curve = static_cast<RED4ext::CLegacySingleChannelCurve*>(aType);
+        return "curveData<" + GetCSType(curve->curveType) + ">";
+    }
+    default:
+    {
+        return name;
+    }
+    }
 }
 
 size_t WolvenKitWriter::GetOrdinalStart(std::shared_ptr<Class> aClass)
