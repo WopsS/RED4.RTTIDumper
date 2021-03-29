@@ -53,10 +53,14 @@ void Dumper::CollectType(RED4ext::CClass* aClass)
 
     if (aClass->parent)
     {
-        CollectType(aClass->parent);
-
         auto name = aClass->parent->name.ToString();
-        auto parent = std::dynamic_pointer_cast<Class>(m_types.at(name));
+        if (m_types.count(name) == 0)
+        {
+            CollectType(aClass->parent);
+        }
+
+        auto type = m_types.at(name);
+        auto parent = std::dynamic_pointer_cast<Class>(type);
 
         cls->parent = parent;
     }
