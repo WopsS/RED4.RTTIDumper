@@ -181,6 +181,11 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
         auto name = SanitizeGeneral(prop->name.ToString());
         name[0] = std::tolower(name[0]);
 
+        if (CheckForDuplicate(prop->parent, prop))
+        {
+            name += "_" + std::to_string(prop->valueOffset);
+        }
+
         file << "\t\tprivate " << csType << " _" << name << ";" << std::endl;
     }
 
@@ -393,6 +398,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
             aFile << "_";
         }
 
+        privateName += "_" + std::to_string(aProperty->valueOffset);
         aFile << aProperty->valueOffset;
     }
 
@@ -401,23 +407,8 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
 
     aFile << std::endl;
     aFile << "\t\t{" << std::endl;
-    aFile << "\t\t\tget" << std::endl;
-    aFile << "\t\t\t{" << std::endl;
-    aFile << "\t\t\t\tif (" << privateName << " == null)" << std::endl;
-    aFile << "\t\t\t\t{" << std::endl;
-    aFile << "\t\t\t\t\t" << privateName << " = (" << csType << ") CR2WTypeManager.Create(\"" << typeName.ToString() << "\", \"" << orgName << "\", cr2w, this);" << std::endl;
-    aFile << "\t\t\t\t}" << std::endl;
-    aFile << "\t\t\t\treturn " << privateName << ";" << std::endl;
-    aFile << "\t\t\t}" << std::endl;
-    aFile << "\t\t\tset" << std::endl;
-    aFile << "\t\t\t{" << std::endl;
-    aFile << "\t\t\t\tif (" << privateName << " == value)" << std::endl;
-    aFile << "\t\t\t\t{" << std::endl;
-    aFile << "\t\t\t\t\treturn;" << std::endl;
-    aFile << "\t\t\t\t}" << std::endl;
-    aFile << "\t\t\t\t" << privateName << " = value;" << std::endl;
-    aFile << "\t\t\t\tPropertySet(this);" << std::endl;
-    aFile << "\t\t\t}" << std::endl;
+    aFile << "\t\t\tget => GetProperty(ref " << privateName << ");" << std::endl;
+    aFile << "\t\t\tset => SetProperty(ref " << privateName << ", value);" << std::endl;
     aFile << "\t\t}" << std::endl;
     aFile << std::endl;
 }
