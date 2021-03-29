@@ -346,30 +346,11 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
     std::string orgName = aProperty->name.ToString();
 
     aFile << "\t\t[Ordinal(" << aOrdinal << ")] " << std::endl;
-    aFile << "\t\t[RED(\"" << orgName << "\"";
+    aFile << "\t\t[RED(\"" << orgName << "\"" << GetFixedSize(aProperty->type) << ")] " << std::endl;
 
-    auto type = aProperty->type;
-
-    using ERTTIType = RED4ext::ERTTIType;
-    switch (type->GetType())
-    {
-    case ERTTIType::StaticArray:
-    {
-        auto arr = static_cast<RED4ext::CStaticArray*>(type);
-        aFile << ", " << arr->size;
-        break;
-    }
-    case ERTTIType::NativeArray:
-    {
-        auto arr = static_cast<RED4ext::CNativeArray*>(type);
-        aFile << ", " << arr->size;
-        break;
-    }
-    }
 
     auto csType = GetCSType(aProperty->type);
 
-    aFile << ")] " << std::endl;
     aFile << "\t\tpublic " << csType << " ";
 
     auto name = SanitizeGeneral(orgName);
@@ -422,6 +403,28 @@ std::string WolvenKitWriter::GetWolvenType(const char* aName)
     }
 
     return aName;
+}
+
+std::string WolvenKitWriter::GetFixedSize(RED4ext::IRTTIType* aType)
+{
+    using ERTTIType = RED4ext::ERTTIType;
+    switch (aType->GetType())
+    {
+    case ERTTIType::StaticArray:
+    {
+        auto arr = static_cast<RED4ext::CStaticArray*>(aType);
+        return ", " + std::to_string(arr->size) + GetFixedSize(arr->innerType);
+    }
+    case ERTTIType::NativeArray:
+    {
+        auto arr = static_cast<RED4ext::CNativeArray*>(aType);
+        return ", " + std::to_string(arr->size) + GetFixedSize(arr->innerType);
+    }
+    default:
+    {
+        return "";
+    }
+    }
 }
 
 std::string WolvenKitWriter::GetCSType(RED4ext::IRTTIType* aType)
