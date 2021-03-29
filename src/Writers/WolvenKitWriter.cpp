@@ -77,6 +77,7 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("animLookAtPartsDependency", 0);
     m_customClasses.emplace("animLookAtRequest", 0);
     m_customClasses.emplace("animRig", 0);
+    m_customClasses.emplace("AreaShapeOutline", 0);
     m_customClasses.emplace("CMaterialInstance", 0);
     m_customClasses.emplace("CMaterialTemplate", 0);
     m_customClasses.emplace("gameDeviceResourceData", 0);
@@ -84,6 +85,7 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("gameJournalInternetPage", 1);
     m_customClasses.emplace("gameLocationResource", 0);
     m_customClasses.emplace("gameLootResourceData", 0);
+    m_customClasses.emplace("gameSmartObjectAnimationDatabase", 0);
     m_customClasses.emplace("meshMeshParamSpeedTreeWind", 0);
     m_customClasses.emplace("MorphTargetMesh", 0);
     m_customClasses.emplace("physicsColliderMesh", 0);
@@ -91,8 +93,12 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("scnAnimationRid", 0);
     m_customClasses.emplace("scnAnimName", 0);
     m_customClasses.emplace("scnAnimName", 0);
+    m_customClasses.emplace("worldInstancedMeshNode", 0);
+    m_customClasses.emplace("worldInstancedOccluderNode", 0);
     m_customClasses.emplace("worldTrafficLanesSpotsResource", 0);
     m_customClasses.emplace("worldNode", 0);
+    m_customClasses.emplace("worldStreamingSector", 0);
+    m_customClasses.emplace("worldTrafficCompiledNode", 0);
 
     // Some ordinals needs to be skipped.
     m_skippedOrdinals.emplace("CMesh", std::unordered_set<size_t>{1, 5, 21});
@@ -346,30 +352,11 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
     std::string orgName = aProperty->name.ToString();
 
     aFile << "\t\t[Ordinal(" << aOrdinal << ")] " << std::endl;
-    aFile << "\t\t[RED(\"" << orgName << "\"";
+    aFile << "\t\t[RED(\"" << orgName << "\"" << GetFixedSize(aProperty->type) << ")] " << std::endl;
 
-    auto type = aProperty->type;
-
-    using ERTTIType = RED4ext::ERTTIType;
-    switch (type->GetType())
-    {
-    case ERTTIType::StaticArray:
-    {
-        auto arr = static_cast<RED4ext::CStaticArray*>(type);
-        aFile << ", " << arr->size;
-        break;
-    }
-    case ERTTIType::NativeArray:
-    {
-        auto arr = static_cast<RED4ext::CNativeArray*>(type);
-        aFile << ", " << arr->size;
-        break;
-    }
-    }
 
     auto csType = GetCSType(aProperty->type);
 
-    aFile << ")] " << std::endl;
     aFile << "\t\tpublic " << csType << " ";
 
     auto name = SanitizeGeneral(orgName);
@@ -422,6 +409,28 @@ std::string WolvenKitWriter::GetWolvenType(const char* aName)
     }
 
     return aName;
+}
+
+std::string WolvenKitWriter::GetFixedSize(RED4ext::IRTTIType* aType)
+{
+    using ERTTIType = RED4ext::ERTTIType;
+    switch (aType->GetType())
+    {
+    case ERTTIType::StaticArray:
+    {
+        auto arr = static_cast<RED4ext::CStaticArray*>(aType);
+        return ", " + std::to_string(arr->size) + GetFixedSize(arr->innerType);
+    }
+    case ERTTIType::NativeArray:
+    {
+        auto arr = static_cast<RED4ext::CNativeArray*>(aType);
+        return ", " + std::to_string(arr->size) + GetFixedSize(arr->innerType);
+    }
+    default:
+    {
+        return "";
+    }
+    }
 }
 
 std::string WolvenKitWriter::GetCSType(RED4ext::IRTTIType* aType)
