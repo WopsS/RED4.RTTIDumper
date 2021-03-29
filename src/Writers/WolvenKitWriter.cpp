@@ -77,6 +77,7 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("animLookAtPartsDependency", 0);
     m_customClasses.emplace("animLookAtRequest", 0);
     m_customClasses.emplace("animRig", 0);
+    m_customClasses.emplace("AreaShapeOutline", 0);
     m_customClasses.emplace("CMaterialInstance", 0);
     m_customClasses.emplace("CMaterialTemplate", 0);
     m_customClasses.emplace("gameDeviceResourceData", 0);
@@ -84,6 +85,7 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("gameJournalInternetPage", 1);
     m_customClasses.emplace("gameLocationResource", 0);
     m_customClasses.emplace("gameLootResourceData", 0);
+    m_customClasses.emplace("gameSmartObjectAnimationDatabase", 0);
     m_customClasses.emplace("meshMeshParamSpeedTreeWind", 0);
     m_customClasses.emplace("MorphTargetMesh", 0);
     m_customClasses.emplace("physicsColliderMesh", 0);
@@ -91,8 +93,12 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("scnAnimationRid", 0);
     m_customClasses.emplace("scnAnimName", 0);
     m_customClasses.emplace("scnAnimName", 0);
+    m_customClasses.emplace("worldInstancedMeshNode", 0);
+    m_customClasses.emplace("worldInstancedOccluderNode", 0);
     m_customClasses.emplace("worldTrafficLanesSpotsResource", 0);
     m_customClasses.emplace("worldNode", 0);
+    m_customClasses.emplace("worldStreamingSector", 0);
+    m_customClasses.emplace("worldTrafficCompiledNode", 0);
 
     // Some ordinals needs to be skipped.
     m_skippedOrdinals.emplace("CMesh", std::unordered_set<size_t>{1, 5, 21});
