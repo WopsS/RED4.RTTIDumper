@@ -46,11 +46,69 @@ void TextWriter::Write(std::shared_ptr<Class> aClass)
         std::filesystem::create_directories(dir);
     }
 
-    
     std::string name = aClass->name.ToString();
     std::fstream file(dir / (name + ".txt"), std::ios::out);
 
     Write(file, aClass);
+}
+
+void TextWriter::Write(std::shared_ptr<Enum> aEnum)
+{
+    auto dir = m_dir / L"enums";
+    if (!std::filesystem::exists(dir))
+    {
+        std::filesystem::create_directories(dir);
+    }
+
+    std::string name = aEnum->name.ToString();
+    std::fstream file(dir / (name + ".txt"), std::ios::out);
+
+    file << "enum " << name << std::endl;
+    file << "{" << std::endl;
+
+    for (size_t i = 0; i < aEnum->enumerators.size(); i++)
+    {
+        const auto& enumerator = aEnum->enumerators[i];
+        file << "\t" << enumerator.name.ToString() << " = ";
+
+        switch (aEnum->typeSize)
+        {
+        case sizeof(int8_t):
+        {
+            file << static_cast<int8_t>(enumerator.value);
+            break;
+        }
+        case sizeof(int16_t):
+        {
+            file << static_cast<int16_t>(enumerator.value);
+            break;
+        }
+        case sizeof(int32_t):
+        {
+            file << static_cast<int32_t>(enumerator.value);
+            break;
+        }
+        case sizeof(int64_t):
+        {
+            file << static_cast<int64_t>(enumerator.value);
+            break;
+        }
+        default:
+        {
+            file << enumerator.value;
+            break;
+        }
+        }
+
+        if (i < aEnum->enumerators.size() - 1)
+        {
+            file << ",";
+        }
+
+        file << std::endl;
+    }
+
+    file << "}";
 }
 
 void TextWriter::Flush()

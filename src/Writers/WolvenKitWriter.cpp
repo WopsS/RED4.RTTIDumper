@@ -228,6 +228,10 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
     m_isWritten.emplace(orgName);
 }
 
+void WolvenKitWriter::Write(std::shared_ptr<Enum> aEnum)
+{
+}
+
 void WolvenKitWriter::Flush()
 {
 }

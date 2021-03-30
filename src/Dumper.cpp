@@ -22,6 +22,13 @@ void Dumper::Run(std::shared_ptr<IWriter> aWriter)
             continue;
         }
 
+        auto enm = std::dynamic_pointer_cast<Enum>(type);
+        if (enm)
+        {
+            aWriter->Write(enm);
+            continue;
+        }
+
         throw std::runtime_error("unhandled type");
     }
 
@@ -42,8 +49,45 @@ void Dumper::CollectTypes()
 
             break;
         }
+        case RED4ext::ERTTIType::Enum:
+        {
+            auto enm = static_cast<RED4ext::CEnum*>(aType);
+            CollectType(enm);
+
+            break;
+        }
         }
     });
+}
+
+void Dumper::CollectType(RED4ext::CEnum* aEnum)
+{
+    auto enm = std::make_shared<Enum>();
+    enm->name = aEnum->hash;
+    enm->typeSize = aEnum->size;
+
+    for (uint32_t i = 0; i < aEnum->hashList.size; i++)
+    {
+        Enum::Enumerator enumerator;
+        enumerator.name = aEnum->hashList[i];
+        enumerator.value = aEnum->valueList[i];
+
+        enm->enumerators.emplace_back(std::move(enumerator));
+    }
+
+    for (uint32_t i = 0; i < aEnum->unk48.size; i++)
+    {
+        Enum::Enumerator enumerator;
+        enumerator.name = aEnum->unk48[i];
+        enumerator.value = aEnum->unk58[i];
+
+        enm->enumerators.emplace_back(std::move(enumerator));
+    }
+
+    std::sort(enm->enumerators.begin(), enm->enumerators.end(),
+              [](const Enum::Enumerator& aLhs, const Enum::Enumerator& aRhs) { return aLhs.value < aRhs.value; });
+
+    m_types.emplace(enm->name.ToString(), enm);
 }
 
 void Dumper::CollectType(RED4ext::CClass* aClass)

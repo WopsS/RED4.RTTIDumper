@@ -9,6 +9,18 @@ struct BaseType
     RED4ext::CName name;
 };
 
+struct Enum : BaseType
+{
+    struct Enumerator
+    {
+        RED4ext::CName name;
+        uint64_t value;
+    };
+
+    std::vector<Enumerator> enumerators;
+    uint8_t typeSize;
+};
+
 struct Class : BaseType
 {
     RED4ext::CClass* raw;

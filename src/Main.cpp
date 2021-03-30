@@ -18,7 +18,7 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED
     writers.emplace_back(new TextWriter(dumpsDir));
     writers.emplace_back(new JsonWriter(dumpsDir));
     writers.emplace_back(new WolvenKitWriter(dumpsDir));
-
+    
     Dumper dumper;
     for (auto writer : writers)
     {

@@ -10,6 +10,7 @@ public:
 
     void Write(Global& aGlobal);
     void Write(std::shared_ptr<Class> aClass);
+    void Write(std::shared_ptr<Enum> aEnum);
     void Flush();
 
 private:

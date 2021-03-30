@@ -98,6 +98,10 @@ void JsonWriter::Write(std::shared_ptr<Class> aClass)
     m_classes.emplace_back(name);
 }
 
+void JsonWriter::Write(std::shared_ptr<Enum> aEnum)
+{
+}
+
 void JsonWriter::Flush()
 {
     std::fstream file;

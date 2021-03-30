@@ -11,9 +11,10 @@ public:
 private:
     void CollectTypes();
 
+    void CollectType(RED4ext::CEnum* aEnum);
+
     void CollectType(RED4ext::CClass* aClass);
     void CollectStatics();
-
     void OrderFunctions();
 
     Global m_global;
