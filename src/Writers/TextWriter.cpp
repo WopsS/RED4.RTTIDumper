@@ -74,10 +74,6 @@ void TextWriter::Write(std::shared_ptr<Enum> aEnum)
         switch (aEnum->typeSize)
         {
         case sizeof(int8_t):
-        {
-            file << static_cast<int8_t>(enumerator.value);
-            break;
-        }
         case sizeof(int16_t):
         {
             file << static_cast<int16_t>(enumerator.value);
