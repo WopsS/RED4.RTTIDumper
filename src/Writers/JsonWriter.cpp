@@ -102,6 +102,10 @@ void JsonWriter::Write(std::shared_ptr<Enum> aEnum)
 {
 }
 
+void JsonWriter::Write(std::shared_ptr<BitField> aBit)
+{
+}
+
 void JsonWriter::Flush()
 {
     std::fstream file;
