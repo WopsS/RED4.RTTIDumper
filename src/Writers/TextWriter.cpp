@@ -130,7 +130,7 @@ void TextWriter::Write(std::shared_ptr<BitField> aBit)
 
         if (bit == 1)
         {
-            file << "\t" << aBit->bitNames[counter].ToString() << " = " << counter;
+            file << "\t" << aBit->bitNames[counter].ToString() << " = 1 << " << counter;
 
             if (validBits != 0)
             {
