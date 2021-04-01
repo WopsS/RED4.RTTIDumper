@@ -29,6 +29,13 @@ void Dumper::Run(std::shared_ptr<IWriter> aWriter)
             continue;
         }
 
+        auto bit = std::dynamic_pointer_cast<BitField>(type);
+        if (bit)
+        {
+            aWriter->Write(bit);
+            continue;
+        }
+
         throw std::runtime_error("unhandled type");
     }
 
@@ -56,8 +63,30 @@ void Dumper::CollectTypes()
 
             break;
         }
+        case RED4ext::ERTTIType::BitField:
+        {
+            auto bit = static_cast<RED4ext::CBitfield*>(aType);
+            CollectType(bit);
+
+            break;
+        }
         }
     });
+}
+
+void Dumper::CollectType(RED4ext::CBitfield* aBit)
+{
+    auto bit = std::make_shared<BitField>();
+    bit->name = aBit->hash;
+    bit->typeSize = aBit->size;
+    bit->validBits = aBit->validBits;
+
+    for (uint32_t i = 0; i < 64; i++)
+    {
+        bit->bitNames.emplace_back(aBit->bitNames[i]);
+    }
+
+    m_types.emplace(bit->name.ToString(), bit);
 }
 
 void Dumper::CollectType(RED4ext::CEnum* aEnum)

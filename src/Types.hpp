@@ -9,6 +9,13 @@ struct BaseType
     RED4ext::CName name;
 };
 
+struct BitField : BaseType
+{
+    uint64_t validBits;
+    std::vector<RED4ext::CName> bitNames;
+    uint8_t typeSize;
+};
+
 struct Enum : BaseType
 {
     struct Enumerator

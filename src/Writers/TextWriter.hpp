@@ -11,6 +11,7 @@ public:
     void Write(Global& aGlobal);
     void Write(std::shared_ptr<Class> aClass);
     void Write(std::shared_ptr<Enum> aEnum);
+    void Write(std::shared_ptr<BitField> aBit);
     void Flush();
 
 private:
