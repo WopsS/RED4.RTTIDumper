@@ -232,6 +232,10 @@ void WolvenKitWriter::Write(std::shared_ptr<Enum> aEnum)
 {
 }
 
+void WolvenKitWriter::Write(std::shared_ptr<BitField> aBit)
+{
+}
+
 void WolvenKitWriter::Flush()
 {
 }

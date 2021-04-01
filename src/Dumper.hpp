@@ -11,6 +11,7 @@ public:
 private:
     void CollectTypes();
 
+    void CollectType(RED4ext::CBitfield* aEnum);
     void CollectType(RED4ext::CEnum* aEnum);
 
     void CollectType(RED4ext::CClass* aClass);

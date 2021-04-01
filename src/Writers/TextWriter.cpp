@@ -107,6 +107,45 @@ void TextWriter::Write(std::shared_ptr<Enum> aEnum)
     file << "}";
 }
 
+void TextWriter::Write(std::shared_ptr<BitField> aBit)
+{
+    auto dir = m_dir / L"bitfields";
+    if (!std::filesystem::exists(dir))
+    {
+        std::filesystem::create_directories(dir);
+    }
+
+    std::string name = aBit->name.ToString();
+    std::fstream file(dir / (name + ".txt"), std::ios::out);
+
+    file << "bitfield " << name << std::endl;
+    file << "{" << std::endl;
+
+    auto validBits = aBit->validBits;
+    auto counter = 0;
+    while (validBits != 0)
+    {
+        auto bit = validBits & 1;
+        validBits >>= 1;
+
+        if (bit == 1)
+        {
+            file << "\t" << aBit->bitNames[counter].ToString() << " = " << counter;
+
+            if (validBits != 0)
+            {
+                file << ",";
+            }
+
+            file << std::endl;
+        }
+
+        counter++;
+    }
+
+    file << "}";
+}
+
 void TextWriter::Flush()
 {
 }
