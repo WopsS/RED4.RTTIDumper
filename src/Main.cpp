@@ -1,5 +1,7 @@
 #include "stdafx.hpp"
 
+#include <RED4ext/Dump/Reflection.hpp>
+
 #include "Dumper.hpp"
 #include "SuspendThreads.hpp"
 #include "Writers/JsonWriter.hpp"
@@ -16,7 +18,7 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED
 
     std::vector<std::shared_ptr<IWriter>> writers;
     writers.emplace_back(new TextWriter(dumpsDir));
-    writers.emplace_back(new JsonWriter(dumpsDir));
+    writers.emplace_back(new JsonWriter(dumpsDir, true));
     writers.emplace_back(new WolvenKitWriter(dumpsDir));
     
     Dumper dumper;
@@ -24,6 +26,9 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED
     {
         dumper.Run(writer);
     }
+
+    auto path = dumpsDir / L"cpp";
+    RED4ext::GameReflection::Dump(path);
 
     return true;
 }
