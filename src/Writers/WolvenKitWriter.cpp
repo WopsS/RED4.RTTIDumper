@@ -80,6 +80,8 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("AreaShapeOutline", 0);
     m_customClasses.emplace("CMaterialInstance", 0);
     m_customClasses.emplace("CMaterialTemplate", 0);
+    m_customClasses.emplace("gameCompiledCoverData", 0);
+    m_customClasses.emplace("gameCompiledSmartObjectData", 0);
     m_customClasses.emplace("gameDeviceResourceData", 0);
     m_customClasses.emplace("gameJournalCodexDescription", 0);
     m_customClasses.emplace("gameJournalInternetPage", 1);
@@ -98,6 +100,7 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("worldTrafficLanesSpotsResource", 0);
     m_customClasses.emplace("worldNode", 0);
     m_customClasses.emplace("worldStreamingSector", 0);
+    m_customClasses.emplace("worldStreamingWorld", 0);
     m_customClasses.emplace("worldTrafficCompiledNode", 0);
 
     // Some ordinals needs to be skipped.
@@ -219,7 +222,7 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
 
     m_nextOrdinals.emplace(orgName, ordinal);
 
-    file << "\t\tpublic " << name << "(CR2WFile cr2w, CVariable parent, string name) : base(cr2w, parent, name) { }"
+    file << "\t\tpublic " << name << "(IRed4EngineFile cr2w, CVariable parent, string name) : base(cr2w, parent, name) { }"
          << std::endl;
 
     file << "\t}" << std::endl;
@@ -552,6 +555,6 @@ size_t WolvenKitWriter::CountOccurences(RED4ext::CClass* aClass, RED4ext::CPrope
 
 std::string WolvenKitWriter::Sanitize(const std::string& aInput)
 {
-    static std::regex reservedKeywords(R"(\bEquals\b|\bPropertyChanged\b|\bRead\b)");
+    static std::regex reservedKeywords(R"(\bEquals\b|\bPropertyChanged\b|\bRead\b|\SetValue\b)");
     return std::regex_replace(aInput, reservedKeywords, "$&_");
 }
