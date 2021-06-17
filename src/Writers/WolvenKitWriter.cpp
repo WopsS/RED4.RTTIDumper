@@ -104,7 +104,7 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
     m_customClasses.emplace("worldTrafficCompiledNode", 0);
 
     // Some ordinals needs to be skipped.
-    m_skippedOrdinals.emplace("CMesh", std::unordered_set<size_t>{1, 5, 21});
+    m_skippedOrdinals.emplace("CMesh", std::unordered_set<size_t>{1, 5, 22});
     m_skippedOrdinals.emplace("animAnimNode_AddSnapToTerrainIkRequest", std::unordered_set<size_t>{12});
     m_skippedOrdinals.emplace("animAnimNode_ConditionalSegmentBegin", std::unordered_set<size_t>{12});
     m_skippedOrdinals.emplace("animAnimNode_Drag", std::unordered_set<size_t>{16});
@@ -115,6 +115,15 @@ WolvenKitWriter::WolvenKitWriter(const std::filesystem::path& aRootDir)
 
 void WolvenKitWriter::Write(Global& aGlobal)
 {
+    m_enumWriter.open(m_dir / "cp77enums.cs", std::ios::out);
+    m_enumWriter << "using System;" << std::endl;
+    m_enumWriter << "using WolvenKit.RED4.CR2W.Reflection;" << std::endl;
+    m_enumWriter << "// ReSharper disable InconsistentNaming" << std::endl;
+    m_enumWriter << std::endl;
+    m_enumWriter << "namespace WolvenKit.RED4.CR2W.Types" << std::endl;
+    m_enumWriter << "{" << std::endl;
+    m_enumWriter << "\tpublic static partial class Enums" << std::endl;
+    m_enumWriter << "\t{" << std::endl;
 }
 
 void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
@@ -233,14 +242,159 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
 
 void WolvenKitWriter::Write(std::shared_ptr<Enum> aEnum)
 {
+    std::string name = aEnum->name.ToString();
+
+    m_enumWriter << "\t\tpublic enum " << name;
+
+    switch (aEnum->typeSize)
+    {
+    case sizeof(int64_t):
+    {
+        m_enumWriter << " : ulong";
+        break;
+    }
+    }
+
+    m_enumWriter << std::endl;
+
+    m_enumWriter << "\t\t{" << std::endl;
+
+    std::unordered_set<std::string> m_valNames;
+
+    for (size_t i = 0; i < aEnum->enumerators.size(); i++)
+    {
+        const auto& enumerator = aEnum->enumerators[i];
+        auto orgName = enumerator.name.ToString();
+        auto valName = SanitizeGeneral(orgName);
+        valName = Sanitize(valName);
+        if (std::isdigit(valName[0]))
+        {
+            valName = "_" + valName;
+        }
+
+        m_enumWriter << "\t\t\t";
+
+        auto elem = m_valNames.find(valName);
+        if (elem != m_valNames.end())
+        {
+            m_enumWriter << "// ";
+        }
+        else
+        {
+            m_valNames.emplace(valName);
+        }
+
+        if (valName != orgName)
+        {
+            m_enumWriter << "[RED(\"" << orgName << "\")] ";
+        }
+
+        if (name == "ETextureCompression" || name == "ETextureRawFormat")
+        {
+            m_enumWriter << valName << ", // = ";
+        }
+        else
+        {
+            m_enumWriter << valName << " = ";
+        }
+
+        switch (aEnum->typeSize)
+        {
+        case sizeof(int8_t):
+        case sizeof(int16_t):
+        {
+            m_enumWriter << static_cast<int16_t>(enumerator.value);
+            break;
+        }
+        case sizeof(int32_t):
+        {
+            m_enumWriter << static_cast<int32_t>(enumerator.value);
+            break;
+        }
+        case sizeof(int64_t):
+        {
+            m_enumWriter << static_cast<int64_t>(enumerator.value);
+            break;
+        }
+        default:
+        {
+            m_enumWriter << enumerator.value;
+            break;
+        }
+        }
+
+        if (i < aEnum->enumerators.size() - 1)
+        {
+            m_enumWriter << ",";
+        }
+
+        m_enumWriter << std::endl;
+    }
+
+    m_enumWriter << "\t\t}" << std::endl;
+    m_enumWriter << std::endl;
 }
 
 void WolvenKitWriter::Write(std::shared_ptr<BitField> aBit)
 {
+    std::string name = aBit->name.ToString();
+
+    m_enumWriter << "\t\t[Flags]" << std::endl;
+    m_enumWriter << "\t\tpublic enum " << name;
+
+    switch (aBit->typeSize)
+    {
+    case sizeof(int64_t):
+    {
+        m_enumWriter << " : ulong";
+        break;
+    }
+    }
+
+    m_enumWriter << std::endl;
+
+    m_enumWriter << "\t\t{" << std::endl;
+
+    auto validBits = aBit->validBits;
+    auto counter = 0;
+    while (validBits != 0)
+    {
+        auto bit = validBits & 1;
+        validBits >>= 1;
+
+        if (bit == 1)
+        {
+            m_enumWriter << "\t\t\t" << aBit->bitNames[counter].ToString() << " = 1";
+            switch (aBit->typeSize)
+            {
+            case sizeof(int64_t):
+            {
+                m_enumWriter << "UL";
+                break;
+            }
+            }
+
+            m_enumWriter << " << " << counter;
+
+            if (validBits != 0)
+            {
+                m_enumWriter << ",";
+            }
+
+            m_enumWriter << std::endl;
+        }
+
+        counter++;
+    }
+
+    m_enumWriter << "\t\t}" << std::endl;
+    m_enumWriter << std::endl;
 }
 
 void WolvenKitWriter::Flush()
 {
+    m_enumWriter << "\t}" << std::endl;
+    m_enumWriter << "}" << std::endl;
 }
 
 void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
@@ -555,6 +709,6 @@ size_t WolvenKitWriter::CountOccurences(RED4ext::CClass* aClass, RED4ext::CPrope
 
 std::string WolvenKitWriter::Sanitize(const std::string& aInput)
 {
-    static std::regex reservedKeywords(R"(\bEquals\b|\bPropertyChanged\b|\bRead\b|\SetValue\b)");
+    static std::regex reservedKeywords(R"(\bEquals\b|\bPropertyChanged\b|\bRead\b|\btrue\b|\bfalse\b)");
     return std::regex_replace(aInput, reservedKeywords, "$&_");
 }
