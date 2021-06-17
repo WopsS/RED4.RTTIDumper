@@ -152,7 +152,17 @@ void TextWriter::Flush()
 
 void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
 {
-    aFile << "class " << aClass->name.ToString();
+    if (aClass->flags.isStruct)
+    {
+        aFile << "struct";
+    }
+    else
+    {
+        aFile << "class";
+    }
+
+    aFile << " " << aClass->name.ToString();
+
     if (aClass->parent)
     {
         aFile << " extends " << aClass->parent->name.ToString();
