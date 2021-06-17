@@ -56,11 +56,11 @@ void JsonWriter::Write(std::shared_ptr<Class> aClass)
         obj["parent"] = parent->name.ToString();
     }
 
-    obj["name"] = {{"hash", aClass->name.hash}, {"text", aClass->name.ToString()}};
-    obj["computedName"] = {{"hash", aClass->computedName.hash}, {"text", aClass->computedName.ToString()}};
-    obj["size"] = aClass->size;
-    obj["alignment"] = aClass->alignment;
-    obj["holderSize"] = aClass->holderSize;
+    obj["name"] = aClass->name.ToString();
+    //obj["computedName"] = aClass->computedName.ToString();
+    //obj["size"] = aClass->size;
+    //obj["alignment"] = aClass->alignment;
+    //obj["holderSize"] = aClass->holderSize;
     obj["flags"] = *reinterpret_cast<uint32_t*>(&aClass->flags);
 
     nlohmann::ordered_json props;
@@ -122,15 +122,20 @@ nlohmann::ordered_json JsonWriter::ProcessType(RED4ext::CProperty* aProperty) co
     RED4ext::CName typeName;
     aProperty->type->GetName(typeName);
 
-    obj["type"] = {{"hash", typeName.hash}, {"text", typeName.ToString()}};
-    obj["name"] = {{"hash", aProperty->name.hash}, {"text", aProperty->name.ToString()}};
+    obj["type"] = typeName.ToString();
+
+    // Skip "__return".
+    if (aProperty->name != "__return")
+    {
+        obj["name"] = aProperty->name.ToString();
+    }
 
     if (aProperty->group.hash)
     {
-        obj["group"] = {{"hash", aProperty->group.hash}, {"text", aProperty->group.ToString()}};
+        obj["group"] = aProperty->group.ToString();
     }
 
-    obj["valueOffset"] = aProperty->valueOffset;
+    //obj["valueOffset"] = aProperty->valueOffset;
     obj["flags"] = *reinterpret_cast<uint64_t*>(&aProperty->flags);
 
     return obj;
@@ -139,8 +144,8 @@ nlohmann::ordered_json JsonWriter::ProcessType(RED4ext::CProperty* aProperty) co
 nlohmann::ordered_json JsonWriter::ProcessType(RED4ext::CBaseFunction* aFunction) const
 {
     nlohmann::ordered_json obj;
-    obj["fullName"] = {{"hash", aFunction->fullName.hash}, {"text", aFunction->fullName.ToString()}};
-    obj["shortName"] = {{"hash", aFunction->shortName.hash}, {"text", aFunction->shortName.ToString()}};
+    obj["fullName"] = aFunction->fullName.ToString();
+    obj["shortName"] = aFunction->shortName.ToString();
 
     if (aFunction->returnType)
     {
