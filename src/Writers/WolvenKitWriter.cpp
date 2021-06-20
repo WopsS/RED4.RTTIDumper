@@ -193,7 +193,7 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
         ordinal = 1000;
     }
 
-    for (auto prop : aClass->raw->props)
+    for (auto prop : aClass->props)
     {
         auto csType = GetCSType(prop->type);
         auto name = SanitizeGeneral(prop->name.ToString());
@@ -210,7 +210,7 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
     file << std::endl;
 
     // We want to write them as they are in the RTTI type, not orderd by offset.
-    for (auto prop : aClass->raw->props)
+    for (auto prop : aClass->props)
     {
         if (skippedOrdinals != m_skippedOrdinals.end())
         {
@@ -709,6 +709,6 @@ size_t WolvenKitWriter::CountOccurences(RED4ext::CClass* aClass, RED4ext::CPrope
 
 std::string WolvenKitWriter::Sanitize(const std::string& aInput)
 {
-    static std::regex reservedKeywords(R"(\bEquals\b|\bPropertyChanged\b|\bRead\b|\btrue\b|\bfalse\b)");
+    static std::regex reservedKeywords(R"(\bEquals\b|\bPropertyChanged\b|\bRead\b|\bSetValue\b|\btrue\b|\bfalse\b)");
     return std::regex_replace(aInput, reservedKeywords, "$&_");
 }

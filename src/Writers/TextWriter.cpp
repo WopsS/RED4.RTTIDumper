@@ -190,7 +190,8 @@ void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
 
         aFile << "var ";
         Write(aFile, prop);
-        aFile << "; // " << std::hex << std::showbase << prop->valueOffset << std::endl;
+        aFile << ";" << std::endl;
+        //aFile << "; // " << std::hex << std::showbase << prop->valueOffset << std::endl;
     }
 
     if (!aClass->props.empty() && !aClass->funcs.empty())

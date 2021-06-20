@@ -122,7 +122,7 @@ void Dumper::CollectType(RED4ext::CEnum* aEnum)
 void Dumper::CollectType(RED4ext::CClass* aClass)
 {
     auto cls = std::make_shared<Class>();
-    cls->raw = aClass;
+    //cls->raw = aClass;
 
     if (aClass->parent)
     {
@@ -151,9 +151,9 @@ void Dumper::CollectType(RED4ext::CClass* aClass)
         cls->props.emplace_back(prop);
     }
 
-    std::sort(cls->props.begin(), cls->props.end(), [](const RED4ext::CProperty* aLhs, const RED4ext::CProperty* aRhs) {
+    /*std::sort(cls->props.begin(), cls->props.end(), [](const RED4ext::CProperty* aLhs, const RED4ext::CProperty* aRhs) {
         return aLhs->valueOffset < aRhs->valueOffset;
-    });
+    });*/
 
     for (auto func : aClass->funcs)
     {
