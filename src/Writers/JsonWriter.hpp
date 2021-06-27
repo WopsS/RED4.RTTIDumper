@@ -20,6 +20,4 @@ private:
 
     std::filesystem::path m_dir;
     bool m_prettyDump;
-
-    nlohmann::json m_classes;
 };

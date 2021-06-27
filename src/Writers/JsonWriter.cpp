@@ -95,24 +95,117 @@ void JsonWriter::Write(std::shared_ptr<Class> aClass)
     }
 
     file << obj << std::endl;
-    m_classes.emplace_back(name);
 }
 
 void JsonWriter::Write(std::shared_ptr<Enum> aEnum)
 {
+    auto dir = m_dir / L"enums";
+    if (!std::filesystem::exists(dir))
+    {
+        std::filesystem::create_directories(dir);
+    }
+
+    std::string name = aEnum->name.ToString();
+    std::fstream file(dir / (name + ".json"), std::ios::out);
+
+    nlohmann::ordered_json obj;
+    obj["name"] = aEnum->name.ToString();
+
+    nlohmann::ordered_json members;
+
+    for (size_t i = 0; i < aEnum->enumerators.size(); i++)
+    {
+        const auto& member = aEnum->enumerators[i];
+
+        nlohmann::ordered_json mbrObj;
+        mbrObj["name"] = member.name.ToString();
+
+        switch (aEnum->typeSize)
+        {
+        case sizeof(int8_t):
+        case sizeof(int16_t):
+        {
+            mbrObj["value"] = member.value;
+            break;
+        }
+        case sizeof(int32_t):
+        {
+            mbrObj["value"] = member.value;
+            break;
+        }
+        case sizeof(int64_t):
+        {
+            mbrObj["value"] = member.value;
+            break;
+        }
+        default:
+        {
+            mbrObj["value"] = member.value;
+            break;
+        }
+        }
+
+        members.emplace_back(mbrObj);
+    }
+
+    obj["members"] = members;
+
+    if (m_prettyDump)
+    {
+        file << std::setw(2);
+    }
+
+    file << obj << std::endl;
 }
 
 void JsonWriter::Write(std::shared_ptr<BitField> aBit)
 {
+    auto dir = m_dir / L"bitfields";
+    if (!std::filesystem::exists(dir))
+    {
+        std::filesystem::create_directories(dir);
+    }
+
+    std::string name = aBit->name.ToString();
+    std::fstream file(dir / (name + ".json"), std::ios::out);
+
+    nlohmann::ordered_json obj;
+    obj["name"] = aBit->name.ToString();
+
+    nlohmann::ordered_json members;
+
+    auto validBits = aBit->validBits;
+    auto counter = 0;
+    while (validBits != 0)
+    {
+        auto bit = validBits & 1;
+        validBits >>= 1;
+
+        if (bit == 1)
+        {
+            nlohmann::ordered_json member;
+
+            member["name"] = aBit->bitNames[counter].ToString();
+            member["bit"] = counter;
+
+            members.emplace_back(member);
+        }
+
+        counter++;
+    }
+
+    obj["members"] = members;
+
+    if (m_prettyDump)
+    {
+        file << std::setw(2);
+    }
+
+    file << obj << std::endl;
 }
 
 void JsonWriter::Flush()
 {
-    std::fstream file;
-
-    file.open(m_dir / L"classes.json", std::ios::out);
-    file << m_classes << std::endl;
-    file.close();
 }
 
 nlohmann::ordered_json JsonWriter::ProcessType(RED4ext::CProperty* aProperty) const
