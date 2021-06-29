@@ -113,8 +113,8 @@ void Dumper::CollectType(RED4ext::CEnum* aEnum)
         enm->enumerators.emplace_back(std::move(enumerator));
     }
 
-    std::sort(enm->enumerators.begin(), enm->enumerators.end(),
-              [](const Enum::Enumerator& aLhs, const Enum::Enumerator& aRhs) { return aLhs.value < aRhs.value; });
+    //std::sort(enm->enumerators.begin(), enm->enumerators.end(),
+    //          [](const Enum::Enumerator& aLhs, const Enum::Enumerator& aRhs) { return aLhs.value < aRhs.value; });
 
     m_types.emplace(enm->name.ToString(), enm);
 }

@@ -96,7 +96,7 @@ void JsonWriter::Write(std::shared_ptr<Class> aClass)
 
     file << obj << std::endl;
 }
-
+#include <iostream>
 void JsonWriter::Write(std::shared_ptr<Enum> aEnum)
 {
     auto dir = m_dir / L"enums";
@@ -125,21 +125,25 @@ void JsonWriter::Write(std::shared_ptr<Enum> aEnum)
         case sizeof(int8_t):
         case sizeof(int16_t):
         {
-            mbrObj["value"] = member.value;
+            mbrObj["value"] = nlohmann::json::number_integer_t(member.value);
             break;
         }
         case sizeof(int32_t):
         {
-            mbrObj["value"] = member.value;
+            mbrObj["value"] = nlohmann::json::number_integer_t(member.value);
             break;
         }
         case sizeof(int64_t):
         {
-            mbrObj["value"] = member.value;
+            mbrObj["value"] = nlohmann::json::number_integer_t(member.value);
             break;
         }
         default:
         {
+            if (member.value == -1)
+            {
+                std::cout << aEnum->name.ToString() << std::endl;
+            }
             mbrObj["value"] = member.value;
             break;
         }
@@ -186,7 +190,7 @@ void JsonWriter::Write(std::shared_ptr<BitField> aBit)
             nlohmann::ordered_json member;
 
             member["name"] = aBit->bitNames[counter].ToString();
-            member["bit"] = counter;
+            member["bit"] = nlohmann::json::number_integer_t(counter);
 
             members.emplace_back(member);
         }
