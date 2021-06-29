@@ -111,7 +111,7 @@ void JsonWriter::Write(std::shared_ptr<Enum> aEnum)
     nlohmann::ordered_json obj;
     obj["name"] = aEnum->name.ToString();
 
-    nlohmann::ordered_json members;
+    nlohmann::ordered_json members = nlohmann::json::array();
 
     for (size_t i = 0; i < aEnum->enumerators.size(); i++)
     {
@@ -172,7 +172,7 @@ void JsonWriter::Write(std::shared_ptr<BitField> aBit)
     nlohmann::ordered_json obj;
     obj["name"] = aBit->name.ToString();
 
-    nlohmann::ordered_json members;
+    nlohmann::ordered_json members = nlohmann::json::array();
 
     auto validBits = aBit->validBits;
     auto counter = 0;
