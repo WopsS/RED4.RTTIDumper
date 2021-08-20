@@ -152,13 +152,27 @@ void TextWriter::Flush()
 
 void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
 {
-    if (aClass->flags.isStruct)
+    if (aClass->flags.isNative)
+    {
+        aFile << "import ";
+    }
+
+    if (aClass->flags.isScriptedStruct)
     {
         aFile << "struct";
     }
-    else
+    else if (aClass->flags.isNative || aClass->flags.isScriptedClass)
     {
         aFile << "class";
+    }
+    else
+    {
+        aFile << "unknown";
+    }
+
+    if (aClass->flags.isAbstract)
+    {
+        aFile << " abstract";
     }
 
     aFile << " " << aClass->name.ToString();
