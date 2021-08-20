@@ -161,13 +161,21 @@ void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
     {
         aFile << "struct";
     }
-    else if (aClass->flags.isNative || aClass->flags.isScriptedClass)
+    else if (aClass->flags.isScriptedClass)
     {
         aFile << "class";
     }
     else
     {
-        aFile << "unknown";
+        static auto serializableType = RED4ext::CRTTISystem::Get()->GetClass("ISerializable");
+        if (!aClass->raw->IsA(serializableType))
+        {
+            aFile << "struct";
+        }
+        else
+        {
+            aFile << "class";
+        }
     }
 
     if (aClass->flags.isAbstract)

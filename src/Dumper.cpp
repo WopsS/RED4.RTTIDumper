@@ -122,7 +122,7 @@ void Dumper::CollectType(RED4ext::CEnum* aEnum)
 void Dumper::CollectType(RED4ext::CClass* aClass)
 {
     auto cls = std::make_shared<Class>();
-    //cls->raw = aClass;
+    cls->raw = aClass;
 
     if (aClass->parent)
     {
