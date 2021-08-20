@@ -45,7 +45,7 @@ void Dumper::Run(std::shared_ptr<IWriter> aWriter)
 void Dumper::CollectTypes()
 {
     auto rtti = RED4ext::CRTTISystem::Get();
-    rtti->types.for_each([this](RED4ext::CName aName, RED4ext::IRTTIType* aType) {
+    rtti->types.for_each([this](RED4ext::CName aName, RED4ext::CBaseRTTIType* aType) {
         auto typeId = aType->GetType();
         switch (typeId)
         {
@@ -77,8 +77,8 @@ void Dumper::CollectTypes()
 void Dumper::CollectType(RED4ext::CBitfield* aBit)
 {
     auto bit = std::make_shared<BitField>();
-    bit->name = aBit->hash;
-    bit->typeSize = aBit->size;
+    bit->name = aBit->name;
+    bit->typeSize = aBit->typeSize;
     bit->validBits = aBit->validBits;
 
     for (uint32_t i = 0; i < 64; i++)
@@ -92,8 +92,8 @@ void Dumper::CollectType(RED4ext::CBitfield* aBit)
 void Dumper::CollectType(RED4ext::CEnum* aEnum)
 {
     auto enm = std::make_shared<Enum>();
-    enm->name = aEnum->hash;
-    enm->typeSize = aEnum->size;
+    enm->name = aEnum->name;
+    enm->typeSize = aEnum->typeSize;
 
     for (uint32_t i = 0; i < aEnum->hashList.size; i++)
     {
@@ -139,8 +139,8 @@ void Dumper::CollectType(RED4ext::CClass* aClass)
     }
 
     cls->name = aClass->name;
-    cls->computedName = aClass->name2;
-    cls->size = aClass->size;
+    cls->computedName = aClass->computedName;
+    cls->size = aClass->realSize;
     cls->alignment = aClass->alignment;
     cls->holderSize = aClass->holderSize;
     cls->flags = aClass->flags;

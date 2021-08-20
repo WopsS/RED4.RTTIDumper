@@ -191,7 +191,7 @@ void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
         aFile << "var ";
         Write(aFile, prop);
         aFile << ";" << std::endl;
-        //aFile << "; // " << std::hex << std::showbase << prop->valueOffset << std::endl;
+        // aFile << "; // " << std::hex << std::showbase << prop->valueOffset << std::endl;
     }
 
     if (!aClass->props.empty() && !aClass->funcs.empty())
@@ -232,9 +232,7 @@ void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
 
 void TextWriter::Write(std::fstream& aFile, const RED4ext::CProperty* aProperty)
 {
-    RED4ext::CName typeName;
-    aProperty->type->GetName(typeName);
-
+    auto typeName = aProperty->type->GetName();
     aFile << aProperty->name.ToString() << " : " << typeName.ToString();
 }
 
@@ -277,9 +275,7 @@ void TextWriter::Write(std::fstream& aFile, const RED4ext::CBaseFunction* aFunct
 
     if (aFunction->returnType)
     {
-        RED4ext::CName name;
-        aFunction->returnType->type->GetName(name);
-
+        auto name = aFunction->returnType->type->GetName();
         aFile << " : " << name.ToString();
     }
 

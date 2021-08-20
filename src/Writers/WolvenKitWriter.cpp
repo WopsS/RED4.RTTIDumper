@@ -148,8 +148,6 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
         Write(aClass->parent);
     }
 
-
-
     auto skippedOrdinals = m_skippedOrdinals.find(name);
 
     auto elem = m_customClasses.find(name);
@@ -231,8 +229,8 @@ void WolvenKitWriter::Write(std::shared_ptr<Class> aClass)
 
     m_nextOrdinals.emplace(orgName, ordinal);
 
-    file << "\t\tpublic " << name << "(IRed4EngineFile cr2w, CVariable parent, string name) : base(cr2w, parent, name) { }"
-         << std::endl;
+    file << "\t\tpublic " << name
+         << "(IRed4EngineFile cr2w, CVariable parent, string name) : base(cr2w, parent, name) { }" << std::endl;
 
     file << "\t}" << std::endl;
     file << "}" << std::endl;
@@ -397,11 +395,9 @@ void WolvenKitWriter::Flush()
     m_enumWriter << "}" << std::endl;
 }
 
-void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
+void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CBaseRTTIType* aType)
 {
-    RED4ext::CName cname;
-    aType->GetName(cname);
-
+    auto cname = aType->GetName();
     auto name = GetWolvenType(cname.ToString());
 
     using ERTTIType = RED4ext::ERTTIType;
@@ -416,7 +412,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "CArray<";
 
-        auto arr = static_cast<RED4ext::CArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTIArrayType*>(aType);
         Write(aFile, arr->innerType);
 
         aFile << ">";
@@ -433,7 +429,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "CStatic<";
 
-        auto arr = static_cast<RED4ext::CStaticArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTIStaticArrayType*>(aType);
         Write(aFile, arr->innerType);
 
         aFile << ">";
@@ -444,7 +440,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "CArrayFixedSize<";
 
-        auto arr = static_cast<RED4ext::CNativeArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTINativeArrayType*>(aType);
         Write(aFile, arr->innerType);
 
         aFile << ">";
@@ -455,7 +451,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "CHandle<";
 
-        auto handle = static_cast<RED4ext::CHandle*>(aType);
+        auto handle = static_cast<RED4ext::CRTTIHandleType*>(aType);
         Write(aFile, handle->innerType);
 
         aFile << ">";
@@ -465,7 +461,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "wCHandle<";
 
-        auto whandle = static_cast<RED4ext::CWeakHandle*>(aType);
+        auto whandle = static_cast<RED4ext::CRTTIWeakHandleType*>(aType);
         Write(aFile, whandle->innerType);
 
         aFile << ">";
@@ -475,7 +471,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "rRef<";
 
-        auto rRef = static_cast<RED4ext::CResourceReference*>(aType);
+        auto rRef = static_cast<RED4ext::CRTTIResourceReferenceType*>(aType);
         Write(aFile, rRef->innerType);
 
         aFile << ">";
@@ -486,7 +482,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "raRef<";
 
-        auto raRef = static_cast<RED4ext::CResourceAsyncReference*>(aType);
+        auto raRef = static_cast<RED4ext::CRTTIResourceAsyncReferenceType*>(aType);
         Write(aFile, raRef->innerType);
 
         aFile << ">";
@@ -497,7 +493,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::IRTTIType* aType)
     {
         aFile << "curveData<";
 
-        auto curve = static_cast<RED4ext::CLegacySingleChannelCurve*>(aType);
+        auto curve = static_cast<RED4ext::CRTTILegacySingleChannelCurveType*>(aType);
         Write(aFile, curve->curveType);
 
         aFile << ">";
@@ -518,7 +514,6 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
 
     aFile << "\t\t[Ordinal(" << aOrdinal << ")] " << std::endl;
     aFile << "\t\t[RED(\"" << orgName << "\"" << GetFixedSize(aProperty->type) << ")] " << std::endl;
-
 
     auto csType = GetCSType(aProperty->type);
 
@@ -554,8 +549,7 @@ void WolvenKitWriter::Write(std::fstream& aFile, RED4ext::CProperty* aProperty, 
         aFile << aProperty->valueOffset;
     }
 
-    RED4ext::CName typeName;
-    aProperty->type->GetName(typeName);
+    auto typeName = aProperty->type->GetName();
 
     aFile << std::endl;
     aFile << "\t\t{" << std::endl;
@@ -576,19 +570,19 @@ std::string WolvenKitWriter::GetWolvenType(const char* aName)
     return aName;
 }
 
-std::string WolvenKitWriter::GetFixedSize(RED4ext::IRTTIType* aType)
+std::string WolvenKitWriter::GetFixedSize(RED4ext::CBaseRTTIType* aType)
 {
     using ERTTIType = RED4ext::ERTTIType;
     switch (aType->GetType())
     {
     case ERTTIType::StaticArray:
     {
-        auto arr = static_cast<RED4ext::CStaticArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTIStaticArrayType*>(aType);
         return ", " + std::to_string(arr->size) + GetFixedSize(arr->innerType);
     }
     case ERTTIType::NativeArray:
     {
-        auto arr = static_cast<RED4ext::CNativeArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTINativeArrayType*>(aType);
         return ", " + std::to_string(arr->size) + GetFixedSize(arr->innerType);
     }
     default:
@@ -598,10 +592,9 @@ std::string WolvenKitWriter::GetFixedSize(RED4ext::IRTTIType* aType)
     }
 }
 
-std::string WolvenKitWriter::GetCSType(RED4ext::IRTTIType* aType)
+std::string WolvenKitWriter::GetCSType(RED4ext::CBaseRTTIType* aType)
 {
-    RED4ext::CName cname;
-    aType->GetName(cname);
+    auto cname = aType->GetName();
 
     auto name = GetWolvenType(cname.ToString());
 
@@ -614,7 +607,7 @@ std::string WolvenKitWriter::GetCSType(RED4ext::IRTTIType* aType)
     }
     case ERTTIType::Array:
     {
-        auto arr = static_cast<RED4ext::CArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTIArrayType*>(aType);
         return "CArray<" + GetCSType(arr->innerType) + ">";
     }
     case ERTTIType::Enum:
@@ -624,37 +617,37 @@ std::string WolvenKitWriter::GetCSType(RED4ext::IRTTIType* aType)
     }
     case ERTTIType::StaticArray:
     {
-        auto arr = static_cast<RED4ext::CStaticArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTIStaticArrayType*>(aType);
         return "CStatic<" + GetCSType(arr->innerType) + ">";
     }
     case ERTTIType::NativeArray:
     {
-        auto arr = static_cast<RED4ext::CNativeArray*>(aType);
+        auto arr = static_cast<RED4ext::CRTTINativeArrayType*>(aType);
         return "CArrayFixedSize<" + GetCSType(arr->innerType) + ">";
     }
     case ERTTIType::Handle:
     {
-        auto handle = static_cast<RED4ext::CHandle*>(aType);
+        auto handle = static_cast<RED4ext::CRTTIHandleType*>(aType);
         return "CHandle<" + GetCSType(handle->innerType) + ">";
     }
     case ERTTIType::WeakHandle:
     {
-        auto whandle = static_cast<RED4ext::CWeakHandle*>(aType);
+        auto whandle = static_cast<RED4ext::CRTTIWeakHandleType*>(aType);
         return "wCHandle<" + GetCSType(whandle->innerType) + ">";
     }
     case ERTTIType::ResourceReference:
     {
-        auto rRef = static_cast<RED4ext::CResourceReference*>(aType);
+        auto rRef = static_cast<RED4ext::CRTTIResourceReferenceType*>(aType);
         return "rRef<" + GetCSType(rRef->innerType) + ">";
     }
     case ERTTIType::ResourceAsyncReference:
     {
-        auto raRef = static_cast<RED4ext::CResourceAsyncReference*>(aType);
+        auto raRef = static_cast<RED4ext::CRTTIResourceAsyncReferenceType*>(aType);
         return "raRef<" + GetCSType(raRef->innerType) + ">";
     }
     case ERTTIType::LegacySingleChannelCurve:
     {
-        auto curve = static_cast<RED4ext::CLegacySingleChannelCurve*>(aType);
+        auto curve = static_cast<RED4ext::CRTTILegacySingleChannelCurveType*>(aType);
         return "curveData<" + GetCSType(curve->curveType) + ">";
     }
     default:
