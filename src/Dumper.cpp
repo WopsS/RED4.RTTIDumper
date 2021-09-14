@@ -202,6 +202,11 @@ void Dumper::OrderFunctions()
             return aLhs->flags.isNative == true;
         }
 
+        if (aLhs->flags.isEvent != aRhs->flags.isEvent)
+        {
+            return aLhs->flags.isEvent == true;
+        }
+
         return std::strcmp(aLhs->shortName.ToString(), aRhs->shortName.ToString()) < 0;
     };
 

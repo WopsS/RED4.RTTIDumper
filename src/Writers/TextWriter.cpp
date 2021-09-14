@@ -230,7 +230,8 @@ void TextWriter::Write(std::fstream& aFile, std::shared_ptr<Class> aClass)
         {
             auto& previous = aClass->funcs[i - 1];
 
-            if (previous->flags.isStatic != func->flags.isStatic || previous->flags.isNative != func->flags.isNative)
+            if (previous->flags.isStatic != func->flags.isStatic || previous->flags.isEvent != func->flags.isEvent ||
+                previous->flags.isNative != func->flags.isNative)
             {
                 aFile << std::endl;
             }
@@ -270,7 +271,21 @@ void TextWriter::Write(std::fstream& aFile, const RED4ext::CBaseFunction* aFunct
         aFile << "static ";
     }
 
-    aFile << "function " << aFunction->shortName.ToString();
+    if (aFunction->flags.isEvent)
+    {
+        aFile << "event";
+    }
+    else if (aFunction->flags.isExec)
+    {
+        aFile << "exec";
+    }
+    else
+    {
+        aFile << "function";
+    }
+
+    aFile << " ";
+    aFile << aFunction->shortName.ToString();
     aFile << "(";
 
     for (auto param : aFunction->params)
