@@ -120,7 +120,7 @@ void JsonWriter::Write(std::shared_ptr<Enum> aEnum)
         nlohmann::ordered_json mbrObj;
         mbrObj["name"] = member.name.ToString();
 
-        switch (aEnum->typeSize)
+        switch (aEnum->actualSize)
         {
         case sizeof(int8_t):
         case sizeof(int16_t):

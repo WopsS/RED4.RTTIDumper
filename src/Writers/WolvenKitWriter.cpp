@@ -244,7 +244,7 @@ void WolvenKitWriter::Write(std::shared_ptr<Enum> aEnum)
 
     m_enumWriter << "\t\tpublic enum " << name;
 
-    switch (aEnum->typeSize)
+    switch (aEnum->actualSize)
     {
     case sizeof(int64_t):
     {
@@ -296,7 +296,7 @@ void WolvenKitWriter::Write(std::shared_ptr<Enum> aEnum)
             m_enumWriter << valName << " = ";
         }
 
-        switch (aEnum->typeSize)
+        switch (aEnum->actualSize)
         {
         case sizeof(int8_t):
         case sizeof(int16_t):
@@ -340,7 +340,7 @@ void WolvenKitWriter::Write(std::shared_ptr<BitField> aBit)
     m_enumWriter << "\t\t[Flags]" << std::endl;
     m_enumWriter << "\t\tpublic enum " << name;
 
-    switch (aBit->typeSize)
+    switch (aBit->actualSize)
     {
     case sizeof(int64_t):
     {
@@ -363,7 +363,7 @@ void WolvenKitWriter::Write(std::shared_ptr<BitField> aBit)
         if (bit == 1)
         {
             m_enumWriter << "\t\t\t" << aBit->bitNames[counter].ToString() << " = 1";
-            switch (aBit->typeSize)
+            switch (aBit->actualSize)
             {
             case sizeof(int64_t):
             {

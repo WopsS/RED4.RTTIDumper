@@ -71,7 +71,7 @@ void TextWriter::Write(std::shared_ptr<Enum> aEnum)
         const auto& enumerator = aEnum->enumerators[i];
         file << "\t" << enumerator.name.ToString() << " = ";
 
-        switch (aEnum->typeSize)
+        switch (aEnum->actualSize)
         {
         case sizeof(int8_t):
         case sizeof(int16_t):

@@ -13,7 +13,7 @@ struct BitField : BaseType
 {
     uint64_t validBits;
     std::vector<RED4ext::CName> bitNames;
-    uint8_t typeSize;
+    uint8_t actualSize;
 };
 
 struct Enum : BaseType
@@ -25,7 +25,7 @@ struct Enum : BaseType
     };
 
     std::vector<Enumerator> enumerators;
-    uint8_t typeSize;
+    uint8_t actualSize;
 };
 
 struct Class : BaseType

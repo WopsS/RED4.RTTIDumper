@@ -1,9 +1,4 @@
-require("premake", ">=5.0.0-alpha15")
-
--- Disable premake.downloadModule, see https://github.com/premake/premake-core/issues/1381.
-premake.downloadModule = function(modname, versions)
-    return false
-end
+require("premake", ">=5.0.0-alpha16")
 
 paths = require("extensions/paths")
 
@@ -15,7 +10,7 @@ workspace("RED4.RTTIDumper")
     characterset("Unicode")
     symbols("Full")
 
-    cppdialect("C++17")
+    cppdialect("C++20")
     systemversion("latest")
 
     defines(

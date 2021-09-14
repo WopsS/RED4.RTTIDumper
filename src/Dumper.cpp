@@ -78,7 +78,7 @@ void Dumper::CollectType(RED4ext::CBitfield* aBit)
 {
     auto bit = std::make_shared<BitField>();
     bit->name = aBit->name;
-    bit->typeSize = aBit->typeSize;
+    bit->actualSize = aBit->actualSize;
     bit->validBits = aBit->validBits;
 
     for (uint32_t i = 0; i < 64; i++)
@@ -93,7 +93,7 @@ void Dumper::CollectType(RED4ext::CEnum* aEnum)
 {
     auto enm = std::make_shared<Enum>();
     enm->name = aEnum->name;
-    enm->typeSize = aEnum->typeSize;
+    enm->actualSize = aEnum->actualSize;
 
     for (uint32_t i = 0; i < aEnum->hashList.size; i++)
     {
@@ -104,11 +104,11 @@ void Dumper::CollectType(RED4ext::CEnum* aEnum)
         enm->enumerators.emplace_back(std::move(enumerator));
     }
 
-    for (uint32_t i = 0; i < aEnum->unk48.size; i++)
+    for (uint32_t i = 0; i < aEnum->aliasList.size; i++)
     {
         Enum::Enumerator enumerator;
-        enumerator.name = aEnum->unk48[i];
-        enumerator.value = aEnum->unk58[i];
+        enumerator.name = aEnum->aliasList[i];
+        enumerator.value = aEnum->aliasValueList[i];
 
         enm->enumerators.emplace_back(std::move(enumerator));
     }
@@ -140,7 +140,7 @@ void Dumper::CollectType(RED4ext::CClass* aClass)
 
     cls->name = aClass->name;
     cls->computedName = aClass->computedName;
-    cls->size = aClass->realSize;
+    cls->size = aClass->size;
     cls->alignment = aClass->alignment;
     cls->holderSize = aClass->holderSize;
     cls->flags = aClass->flags;
