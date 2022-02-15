@@ -8,33 +8,51 @@
 #include "Writers/TextWriter.hpp"
 #include "Writers/WolvenKitWriter.hpp"
 
-RED4EXT_C_EXPORT bool RED4EXT_CALL Load(RED4ext::PluginHandle aHandle, const RED4ext::IRED4ext* aInterface)
+RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::EMainReason aReason,
+                                        const RED4ext::Sdk* aSdk)
 {
-    // Suspend other threads, if this process will take long (> 120 seconds) watchdog will bitch and close the
-    // process. Since the watchdog run on a different thread, this will do the trick.
-    SuspendThreads _;
-
-    auto dumpsDir = std::filesystem::current_path() / L"dumps";
-
-    std::vector<std::shared_ptr<IWriter>> writers;
-    writers.emplace_back(new TextWriter(dumpsDir));
-    writers.emplace_back(new JsonWriter(dumpsDir, true));
-    writers.emplace_back(new WolvenKitWriter(dumpsDir));
-    
-    Dumper dumper;
-    for (auto writer : writers)
+    switch (aReason)
     {
-        dumper.Run(writer);
+    case RED4ext::EMainReason::Load:
+    {
+        RED4ext::GameState state;
+        state.OnEnter = nullptr;
+        state.OnUpdate = [](RED4ext::CGameApplication* aApp) {
+            // Suspend other threads, if this process will take long (> 120 seconds) watchdog will bitch and close the
+            // process. Since the watchdog run on a different thread, this will do the trick.
+            SuspendThreads _;
+
+            auto dumpsDir = std::filesystem::current_path() / L"dumps";
+
+            std::vector<std::shared_ptr<IWriter>> writers;
+            writers.emplace_back(new TextWriter(dumpsDir));
+            writers.emplace_back(new JsonWriter(dumpsDir, true));
+            writers.emplace_back(new WolvenKitWriter(dumpsDir));
+
+            Dumper dumper;
+            for (auto writer : writers)
+            {
+                dumper.Run(writer);
+            }
+
+            auto path = dumpsDir / L"cpp";
+            RED4ext::GameReflection::Dump(path);
+
+            return true;
+        };
+        state.OnExit = nullptr;
+
+        aSdk->gameStates->Add(aHandle, RED4ext::EGameStateType::Running, &state);
+
+        break;
+    }
+    case RED4ext::EMainReason::Unload:
+    {
+        break;
+    }
     }
 
-    auto path = dumpsDir / L"cpp";
-    RED4ext::GameReflection::Dump(path);
-
     return true;
-}
-
-RED4EXT_C_EXPORT void RED4EXT_CALL Unload()
-{
 }
 
 RED4EXT_C_EXPORT void RED4EXT_CALL Query(RED4ext::PluginInfo* aInfo)
