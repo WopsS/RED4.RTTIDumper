@@ -59,12 +59,13 @@ jobs:
           New-Item -ItemType directory -Path $packagingDir
           New-Item -ItemType directory -Path $packagingDir/red4ext
           New-Item -ItemType directory -Path $packagingDir/red4ext/plugins
+          New-Item -ItemType directory -Path $packagingDir/red4ext/plugins/RED4ext.RTTIDumper
 
           # Copy the build artifacts.
-          Copy-Item -Path ./${{ matrix.config }}/bin/RED4ext.RTTIDumper.dll -Destination $packagingDir/red4ext/plugins
+          Copy-Item -Path ./${{ matrix.config }}/bin/RED4ext.RTTIDumper.dll -Destination $packagingDir/red4ext/plugins/RED4ext.RTTIDumper
 
           # Copy the license.
-          Copy-Item -Path ../LICENSE.md -Destination $packagingDir/red4ext/LICENSE.txt
+          Copy-Item -Path ../LICENSE.md -Destination $packagingDir/red4ext/plugins/RED4ext.RTTIDumper/LICENSE.txt
 
       - name: Prepare ZIP (PDBs)
         working-directory: build
@@ -75,9 +76,10 @@ jobs:
           New-Item -ItemType directory -Path $packagingDir
           New-Item -ItemType directory -Path $packagingDir/red4ext
           New-Item -ItemType directory -Path $packagingDir/red4ext/plugins
+          New-Item -ItemType directory -Path $packagingDir/red4ext/plugins/RED4ext.RTTIDumper
 
           # Copy the PDBs.
-          Copy-Item -Path ./${{ matrix.config }}/bin/RED4ext.RTTIDumper.pdb -Destination $packagingDir/red4ext/plugins
+          Copy-Item -Path ./${{ matrix.config }}/bin/RED4ext.RTTIDumper.pdb -Destination $packagingDir/red4ext/plugins/RED4ext.RTTIDumper
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v3
