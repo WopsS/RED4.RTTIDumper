@@ -82,11 +82,11 @@ jobs:
       - name: Upload ZIP
         uses: actions/upload-artifact@v3
         with:
-          name: red4ext_${{ env.RTTIDUMPER_PRETTY_CONFIG }}_${{ env.RTTIDUMPER_COMMIT_SHA }}
+          name: red4_rttidumper_${{ env.RTTIDUMPER_PRETTY_CONFIG }}_${{ env.RTTIDUMPER_COMMIT_SHA }}
           path: build/.packaging/
 
       - name: Upload ZIP (PDBs)
         uses: actions/upload-artifact@v3
         with:
-          name: red4ext_${{ env.RTTIDUMPER_PRETTY_CONFIG }}_${{ env.RTTIDUMPER_COMMIT_SHA }}_pdbs
+          name: red4_rttidumper_${{ env.RTTIDUMPER_PRETTY_CONFIG }}_${{ env.RTTIDUMPER_COMMIT_SHA }}_pdbs
           path: build/.packaging_pdbs/
