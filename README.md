@@ -11,8 +11,11 @@ A tool that dumps the scripting RTTI from RED4 engine ([Cyberpunk 2077](https://
 
 ## Build instructions
 
-1. Download and install [Visual Studio 2019 Community Edition](https://www.visualstudio.com/) or a higher version.
-2. Extract the content of [Premake 5](https://github.com/premake/premake-core/releases) in the `premake` directory.
+1. Download and install [Visual Studio 2022 Community Edition](https://www.visualstudio.com/) or a newer version.
+2. Download and install [CMake 3.23](https://cmake.org/) or a newer version.
 3. Clone this repository.
-4. Go to the `premake` directory and run `generate_project.bat`.
-5. Open the solution (`RED4.RTTIDumper.sln`) located in `project` directory.
+4. Clone the dependencies (`git submodule update --init --recursive`).
+5. Create a directory named `build`.
+5. Go to the `build` directory and run `cmake ..`.
+6. Open the solution (`RED4.RTTIDumper.sln`).
+7. Build the projects.

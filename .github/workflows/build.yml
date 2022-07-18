@@ -4,41 +4,89 @@ on: [ push, pull_request ]
 jobs:
   build:
     name: Build (${{ matrix.config }})
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     strategy:
       matrix:
-        config: [ Debug, Release ]
+        config: [ Debug, RelWithDebInfo ]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 1
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
-
-      - name: Download Premake
-        shell: powershell
-        run: Invoke-WebRequest https://github.com/premake/premake-core/releases/download/v5.0.0-beta1/premake-5.0.0-beta1-windows.zip -OutFile ./premake/premake.zip
-
-      - name: Extract Premake
-        shell: powershell
-        run: Expand-Archive -Path ./premake/premake.zip -DestinationPath ./premake
-
-      - name: Generate project
+      - name: Create environment variables
         run: |
-          cd premake
-          ./generate_project.bat
+          $commitSha = (git rev-parse --short $env:GITHUB_SHA)
+          echo "RTTIDUMPER_COMMIT_SHA=${commitSha}" | Out-File -FilePath $env:GITHUB_ENV -Encoding UTF8 -Append
+
+          # CMake is building PDB files for release artifacts using "RelWithDebInfo" config.
+          # Create a "pretty" name for this to make it easier to refer users to this CI artifact in case a bug needs
+          # testing.
+          $config = "${{ matrix.config }}"
+          if ($config -eq "RelWithDebInfo") {
+            $config = "release"
+          }
+          else {
+            $config = $config.ToLower()
+          }
+
+          echo "RTTIDUMPER_PRETTY_CONFIG=${config}" | Out-File -FilePath $env:GITHUB_ENV -Encoding UTF8 -Append
+
+      - name: Create build directory
+        run: mkdir build
+
+      - name: Configure
+        working-directory: build
+        run: |
+          cmake ${{ github.workspace }}
 
       - name: Build
+        working-directory: build
         run: |
-          cd premake/project
-          MSBuild.exe RED4.RTTIDumper.sln -v:minimal -m -property:Configuration=${{ matrix.config }}
+          cmake `
+            --build . `
+            --config ${{ matrix.config }}
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+      - name: Prepare ZIP
+        working-directory: build
+        run: |
+          $packagingDir = "./.packaging"
+
+          # Create the necessary directories.
+          New-Item -ItemType directory -Path $packagingDir
+          New-Item -ItemType directory -Path $packagingDir/red4ext
+          New-Item -ItemType directory -Path $packagingDir/red4ext/plugins
+
+          # Copy the build artifacts.
+          Copy-Item -Path ./${{ matrix.config }}/bin/RED4ext.RTTIDumper.dll -Destination $packagingDir/red4ext/plugins
+
+          # Copy the license.
+          Copy-Item -Path ../LICENSE.md -Destination $packagingDir/red4ext/LICENSE.txt
+
+      - name: Prepare ZIP (PDBs)
+        working-directory: build
+        run: |
+          $packagingDir = "./.packaging_pdbs"
+
+          # Create the necessary directories.
+          New-Item -ItemType directory -Path $packagingDir
+          New-Item -ItemType directory -Path $packagingDir/red4ext
+          New-Item -ItemType directory -Path $packagingDir/red4ext/plugins
+
+          # Copy the PDBs.
+          Copy-Item -Path ./${{ matrix.config }}/bin/RED4ext.RTTIDumper.pdb -Destination $packagingDir/red4ext/plugins
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v3
         with:
-          name: RED4.RTTIDumper-${{ matrix.config }}
-          path: build/${{ matrix.config }}/
+          name: red4ext_${{ env.RTTIDUMPER_PRETTY_CONFIG }}_${{ env.RTTIDUMPER_COMMIT_SHA }}
+          path: build/.packaging/
+
+      - name: Upload ZIP (PDBs)
+        uses: actions/upload-artifact@v3
+        with:
+          name: red4ext_${{ env.RTTIDUMPER_PRETTY_CONFIG }}_${{ env.RTTIDUMPER_COMMIT_SHA }}_pdbs
+          path: build/.packaging_pdbs/
