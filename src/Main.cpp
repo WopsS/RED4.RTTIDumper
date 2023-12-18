@@ -7,6 +7,7 @@
 #include "Writers/JsonWriter.hpp"
 #include "Writers/TextWriter.hpp"
 #include "Writers/WolvenKitWriter.hpp"
+#include "Writers/NativeDBJsonWriter.hpp"
 
 RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::EMainReason aReason,
                                         const RED4ext::Sdk* aSdk)
@@ -28,6 +29,7 @@ RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::
             writers.emplace_back(new TextWriter(dumpsDir));
             writers.emplace_back(new JsonWriter(dumpsDir, true));
             writers.emplace_back(new WolvenKitWriter(dumpsDir));
+            writers.emplace_back(new NativeDBJsonWriter(dumpsDir));
 
             Dumper dumper;
             for (auto writer : writers)
